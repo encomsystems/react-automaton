@@ -67,7 +67,7 @@ const ClaimsPortal = () => {
     {
       id: 'issues',
       title: 'Invoice Processing',
-      description: 'please waiting for replay status',
+      description: 'Waiting for receiving confirmation',
       status: 'pending',
       icon: 'message-square'
     },
