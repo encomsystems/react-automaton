@@ -102,7 +102,7 @@ const ClaimsPortal = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="border-b bg-card shadow-soft">
         <div className="mx-auto max-w-7xl px-6 py-4">
@@ -130,19 +130,17 @@ const ClaimsPortal = () => {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-8">
             <MainContent 
               currentStep={currentStep}
               uploadedFile={uploadedFile}
               onFileUpload={handleFileUpload}
               onStepComplete={() => {}}
             />
+            
+            {/* System Logs */}
+            <SystemLogs logs={logs} />
           </div>
-        </div>
-
-        {/* System Logs */}
-        <div className="mt-8">
-          <SystemLogs logs={logs} />
         </div>
       </div>
     </div>
