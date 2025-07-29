@@ -46,10 +46,10 @@ export const SystemLogs = ({ logs }: SystemLogsProps) => {
 
       <div className="bg-black rounded-lg p-4 shadow-medium border font-mono text-sm">
         <div className="space-y-1 max-h-48 overflow-y-auto">
-          {logs.map((log) => {            
+          {logs.map((log, index) => {            
             return (
               <div 
-                key={log.id} 
+                key={`${log.id}-${index}`} 
                 className="text-green-400 text-sm leading-relaxed animate-slide-in"
               >
                 <span className="text-green-500">[{formatTime(log.timestamp)}]</span> {log.message}

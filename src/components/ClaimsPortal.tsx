@@ -155,16 +155,38 @@ const ClaimsPortal = () => {
   };
 
   const handleProcessInvoice = async () => {
-    if (!uploadedFile) return;
+    if (!uploadedFile || !resumeUrl) return;
     
+    setIsProcessing(true);
     addLog('Processing invoice...', 'info');
     setCurrentStep('products');
     
-    // Simulate workflow progression
-    setTimeout(() => {
+    try {
+      const formData = new FormData();
+      formData.append('file', uploadedFile);
+      formData.append('action', 'process_invoice');
+      
+      addLog(`Sending file to n8n workflow: ${resumeUrl}`, 'info');
+      
+      const response = await fetch(resumeUrl, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      addLog('Invoice sent successfully to n8n', 'success');
       addLog('Accessing XFX API...', 'info');
       setCurrentStep('issues');
-    }, 2000);
+      
+    } catch (error) {
+      addLog(`Error sending invoice: ${error.message}`, 'error');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (

@@ -199,12 +199,13 @@ export const MainContent = ({
 
         {uploadedFile && (
           <div className="mt-6 flex justify-end">
-            <Button 
-              onClick={onStepComplete}
-              className="bg-gradient-primary hover:scale-105 transition-transform"
-            >
-              Upload Invoice
-            </Button>
+          <Button 
+            onClick={onStepComplete}
+            disabled={isProcessing}
+            className="bg-gradient-primary hover:scale-105 transition-transform"
+          >
+            {isProcessing ? 'Sending to n8n...' : 'Upload Invoice'}
+          </Button>
           </div>
         )}
       </div>
