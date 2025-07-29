@@ -53,7 +53,7 @@ const ClaimsPortal = () => {
     {
       id: 'upload',
       title: 'Upload Invoice',
-      description: 'Provide proof of purchase',
+      description: 'Provide xml file',
       status: 'current',
       icon: 'upload'
     },
