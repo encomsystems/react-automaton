@@ -193,17 +193,29 @@ const ClaimsPortal = () => {
       addLog('Accessing XFX API...', 'info');
       setCurrentStep('issues');
       
-      // Handle the response data
-      if (Array.isArray(data) && data.length > 0) {
-        const responseData = data[0];
-        setInvoiceResponse(responseData);
+      // Handle the response data - check if it's the expected format
+      if (data) {
+        console.log('Processing response data:', data);
         
-        if (responseData.error) {
-          addLog(`Error from XFX API: ${responseData.errorMessage}`, 'error');
+        // If data is an array, take the first element
+        const responseData = Array.isArray(data) ? data[0] : data;
+        
+        if (responseData) {
+          setInvoiceResponse(responseData);
+          
+          if (responseData.error) {
+            addLog(`Error from XFX API: ${responseData.errorMessage}`, 'error');
+          } else if (responseData.xfxTrackingId || responseData.invoiceNo) {
+            addLog(`Invoice processed successfully. Tracking ID: ${responseData.xfxTrackingId || responseData.invoiceNo}`, 'success');
+            setCurrentStep('resolution');
+          } else {
+            addLog('Invoice sent to XFX API, waiting for response...', 'info');
+          }
         } else {
-          addLog(`Invoice processed successfully. Tracking ID: ${responseData.xfxTrackingId}`, 'success');
-          setCurrentStep('resolution');
+          addLog('Invoice sent successfully, no response data received yet', 'info');
         }
+      } else {
+        addLog('Invoice sent successfully, waiting for processing...', 'info');
       }
       
     } catch (error) {
