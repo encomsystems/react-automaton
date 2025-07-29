@@ -113,11 +113,13 @@ const ClaimsPortal = () => {
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
-      // Call n8n webhook directly
-      const response = await fetch(webhookUrl, {
+      // Use CORS proxy to avoid CORS issues
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const response = await fetch(proxyUrl + webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({
           action: 'start_process',
@@ -171,20 +173,14 @@ const ClaimsPortal = () => {
       console.log('About to send FormData to:', resumeUrl);
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
-      // Test if the resume URL is accessible first
-      try {
-        const testResponse = await fetch(resumeUrl, {
-          method: 'OPTIONS',
-        });
-        console.log('OPTIONS request result:', testResponse.status);
-      } catch (optionsError) {
-        console.log('OPTIONS request failed:', optionsError);
-        addLog('Warning: Resume URL might not be properly configured for CORS', 'warning');
-      }
+      // Use CORS proxy for the resume URL as well
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      addLog('Using CORS proxy to send file', 'info');
       
-      const response = await fetch(resumeUrl, {
+      const response = await fetch(proxyUrl + resumeUrl, {
         method: 'POST',
         headers: {
+          'X-Requested-With': 'XMLHttpRequest'
           // Don't set Content-Type for FormData - let browser set it with boundary
         },
         body: formData,
