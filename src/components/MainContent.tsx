@@ -115,7 +115,7 @@ export const MainContent = ({
                   Drag & drop your invoice here
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Supports PDF and PNG files
+                  Supports XML files
                 </p>
               </div>
               <Button 
