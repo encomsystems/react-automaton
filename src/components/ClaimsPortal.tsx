@@ -113,13 +113,12 @@ const ClaimsPortal = () => {
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
-      // Use CORS proxy to avoid CORS issues
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-      const response = await fetch(proxyUrl + webhookUrl, {
+      // Use alternative CORS proxy
+      const proxyUrl = 'https://api.allorigins.win/raw?url=';
+      const response = await fetch(proxyUrl + encodeURIComponent(webhookUrl), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({
           action: 'start_process',
@@ -173,14 +172,13 @@ const ClaimsPortal = () => {
       console.log('About to send FormData to:', resumeUrl);
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
-      // Use CORS proxy for the resume URL as well
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-      addLog('Using CORS proxy to send file', 'info');
+      // For file uploads, try direct connection first, then fallback
+      addLog('Attempting direct connection to resume URL...', 'info');
       
-      const response = await fetch(proxyUrl + resumeUrl, {
+      const response = await fetch(resumeUrl, {
         method: 'POST',
+        mode: 'no-cors', // This bypasses CORS but limits response access
         headers: {
-          'X-Requested-With': 'XMLHttpRequest'
           // Don't set Content-Type for FormData - let browser set it with boundary
         },
         body: formData,
