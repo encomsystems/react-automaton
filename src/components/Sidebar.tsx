@@ -21,7 +21,7 @@ export const Sidebar = ({ steps, currentStep, onStepClick }: SidebarProps) => {
     <div className="space-y-6 animate-fade-in">
       {/* Claim Status Card */}
       <div className="rounded-lg bg-gradient-card p-6 shadow-medium border">
-        <h2 className="text-lg font-semibold text-foreground mb-2">Claim Status</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-2">Invoice workflow status</h2>
         <p className="text-sm text-muted-foreground">Track your progress</p>
         
         <div className="mt-4 space-y-3">
