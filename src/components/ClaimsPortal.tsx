@@ -97,8 +97,8 @@ const ClaimsPortal = () => {
     addLog('Triggering n8n workflow...', 'info');
 
     try {
-      // Replace with your actual backend URL
-      const response = await fetch('/api/trigger-n8n', {
+      // Call n8n webhook directly
+      const response = await fetch('https://modest-stable-terrapin.ngrok-free.app/webhook-test/invoice-postman', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
