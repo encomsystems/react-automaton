@@ -1,5 +1,6 @@
+
 import { useState, useRef } from 'react';
-import { Upload, File, X } from 'lucide-react';
+import { Upload, File, X, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -69,39 +70,44 @@ export const MainContent = ({
     onFileUpload(null as any);
   };
 
-  const renderUploadStep = () => (
+  const renderStartStep = () => (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-2">Upload Your Invoice</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-2">Start Process</h2>
         <p className="text-muted-foreground">
-          Follow the steps below to process your claim
+          Click to initiate the n8n workflow and get your resume URL
         </p>
       </div>
 
-      {/* Start Process Button */}
-      {onTriggerWorkflow && !resumeUrl && (
-        <div className="bg-card rounded-lg p-6 shadow-medium border mb-6">
-          <div className="text-center space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">
-              Start Process
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Click to initiate the n8n workflow and get your resume URL
-            </p>
-            <Button 
-              onClick={onTriggerWorkflow}
-              disabled={isProcessing}
-              className="bg-gradient-primary hover:scale-105 transition-transform"
-            >
-              {isProcessing ? 'Starting Workflow...' : 'Start Process'}
-            </Button>
+      <div className="bg-card rounded-lg p-8 shadow-medium border text-center">
+        <div className="space-y-6">
+          <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <Play className="h-8 w-8 text-primary" />
           </div>
+          
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Initialize Workflow
+            </h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Start the invoice processing workflow by connecting to the n8n automation system
+            </p>
+          </div>
+
+          <Button 
+            onClick={onTriggerWorkflow}
+            disabled={isProcessing}
+            className="bg-gradient-primary hover:scale-105 transition-transform"
+            size="lg"
+          >
+            {isProcessing ? 'Starting Workflow...' : 'Start Process'}
+          </Button>
         </div>
-      )}
+      </div>
 
       {/* Resume URL Display */}
       {resumeUrl && (
-        <div className="bg-card rounded-lg p-6 shadow-medium border mb-6">
+        <div className="bg-card rounded-lg p-6 shadow-medium border">
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-success">
               Workflow Started Successfully
@@ -117,6 +123,17 @@ export const MainContent = ({
           </div>
         </div>
       )}
+    </div>
+  );
+
+  const renderUploadStep = () => (
+    <div className="space-y-6 animate-fade-in">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-foreground mb-2">Upload Your Invoice</h2>
+        <p className="text-muted-foreground">
+          Select your XML invoice file to continue processing
+        </p>
+      </div>
 
       <div className="bg-card rounded-lg p-8 shadow-medium border">
         <div
@@ -225,7 +242,9 @@ export const MainContent = ({
 
   return (
     <div>
-      {currentStep === 'upload' ? renderUploadStep() : renderOtherSteps()}
+      {currentStep === 'start' && renderStartStep()}
+      {currentStep === 'upload' && renderUploadStep()}
+      {(currentStep === 'products' || currentStep === 'issues' || currentStep === 'resolution') && renderOtherSteps()}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { MainContent } from './MainContent';
@@ -19,7 +20,7 @@ export interface LogEntry {
 }
 
 const ClaimsPortal = () => {
-  const [currentStep, setCurrentStep] = useState('upload');
+  const [currentStep, setCurrentStep] = useState('start');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -44,43 +45,56 @@ const ClaimsPortal = () => {
     }
   ]);
 
-  const steps: ClaimStep[] = [
-    {
-      id: 'start',
-      title: 'Start Process',
-      description: 'Initiate your claim',
-      status: 'completed',
-      icon: 'play'
-    },
-    {
-      id: 'upload',
-      title: 'Upload Invoice',
-      description: 'Provide xml file',
-      status: 'current',
-      icon: 'upload'
-    },
-    {
-      id: 'products',
-      title: 'Sending invoice',
-      description: 'Accessing XFX API',
-      status: 'pending',
-      icon: 'package'
-    },
-    {
-      id: 'issues',
-      title: 'Invoice Processing',
-      description: 'Waiting for receiving confirmation',
-      status: 'pending',
-      icon: 'message-square'
-    },
-    {
-      id: 'resolution',
-      title: 'Invoice Processed',
-      description: 'Status of invoice',
-      status: 'pending',
-      icon: 'check-circle'
+  const getSteps = (): ClaimStep[] => {
+    const baseSteps = [
+      {
+        id: 'start',
+        title: 'Start Process',
+        description: 'Initiate your claim',
+        status: 'current' as const,
+        icon: 'play'
+      }
+    ];
+
+    if (resumeUrl) {
+      return [
+        {
+          ...baseSteps[0],
+          status: 'completed' as const
+        },
+        {
+          id: 'upload',
+          title: 'Upload Invoice',
+          description: 'Provide xml file',
+          status: 'current' as const,
+          icon: 'upload'
+        },
+        {
+          id: 'products',
+          title: 'Sending invoice',
+          description: 'Accessing XFX API',
+          status: 'pending' as const,
+          icon: 'package'
+        },
+        {
+          id: 'issues',
+          title: 'Invoice Processing',
+          description: 'Waiting for receiving confirmation',
+          status: 'pending' as const,
+          icon: 'message-square'
+        },
+        {
+          id: 'resolution',
+          title: 'Invoice Processed',
+          description: 'Status of invoice',
+          status: 'pending' as const,
+          icon: 'check-circle'
+        }
+      ];
     }
-  ];
+
+    return baseSteps;
+  };
 
   const addLog = (message: string, type: LogEntry['type'] = 'info') => {
     const newLog: LogEntry = {
@@ -94,11 +108,12 @@ const ClaimsPortal = () => {
 
   const triggerN8nWorkflow = async () => {
     setIsProcessing(true);
-    addLog('Triggering n8n workflow...', 'info');
+    const webhookUrl = 'https://modest-stable-terrapin.ngrok-free.app/webhook-test/invoice-postman';
+    addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
       // Call n8n webhook directly
-      const response = await fetch('https://modest-stable-terrapin.ngrok-free.app/webhook-test/invoice-postman', {
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,6 +134,7 @@ const ClaimsPortal = () => {
         setResumeUrl(data.resumeUrl);
         addLog('Workflow triggered successfully', 'success');
         addLog(`Resume URL received: ${data.resumeUrl}`, 'info');
+        setCurrentStep('upload');
       } else {
         throw new Error('No resumeUrl received from n8n');
       }
@@ -173,7 +189,7 @@ const ClaimsPortal = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <Sidebar 
-              steps={steps} 
+              steps={getSteps()} 
               currentStep={currentStep}
               onStepClick={setCurrentStep}
             />
