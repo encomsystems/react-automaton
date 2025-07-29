@@ -168,17 +168,27 @@ const ClaimsPortal = () => {
       formData.append('action', 'process_invoice');
       
       addLog(`Sending file to n8n workflow: ${resumeUrl}`, 'info');
+      console.log('About to send FormData to:', resumeUrl);
+      console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
       const response = await fetch(resumeUrl, {
         method: 'POST',
+        headers: {
+          // Don't set Content-Type for FormData - let browser set it with boundary
+        },
         body: formData,
       });
 
+      console.log('Response received:', { status: response.status, ok: response.ok });
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.log('Error response text:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Response data:', data);
       addLog('Invoice sent successfully to n8n', 'success');
       addLog('Accessing XFX API...', 'info');
       setCurrentStep('issues');
@@ -197,7 +207,15 @@ const ClaimsPortal = () => {
       }
       
     } catch (error) {
-      addLog(`Error sending invoice: ${error.message}`, 'error');
+      console.error('Full error details:', error);
+      console.log('Error name:', error.name);
+      console.log('Error message:', error.message);
+      
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        addLog('Network error: Unable to connect to n8n workflow. Please check if the ngrok tunnel is running.', 'error');
+      } else {
+        addLog(`Error sending invoice: ${error.message}`, 'error');
+      }
     } finally {
       setIsProcessing(false);
     }
