@@ -130,15 +130,13 @@ const ClaimsPortal = () => {
 
       const data = await response.json();
       
-      if (data.resumeUrl && !data.resumeUrl.includes('{{')) {
+      if (data.resumeUrl) {
         setResumeUrl(data.resumeUrl);
         addLog('Workflow triggered successfully', 'success');
         addLog(`Resume URL received: ${data.resumeUrl}`, 'info');
         setCurrentStep('upload');
       } else {
-        addLog('Warning: n8n returned template placeholder instead of actual URL', 'warning');
-        addLog('Please check your n8n workflow configuration', 'error');
-        throw new Error('Invalid resumeUrl received from n8n (template not resolved)');
+        throw new Error('No resumeUrl received from n8n');
       }
     } catch (error) {
       addLog(`Error triggering workflow: ${error.message}`, 'error');
@@ -157,10 +155,7 @@ const ClaimsPortal = () => {
   };
 
   const handleProcessInvoice = async () => {
-    if (!uploadedFile || !resumeUrl || resumeUrl.includes('{{')) {
-      addLog('Error: Invalid resume URL or missing file', 'error');
-      return;
-    }
+    if (!uploadedFile || !resumeUrl) return;
     
     setIsProcessing(true);
     addLog('Processing invoice...', 'info');
