@@ -21,6 +21,8 @@ export interface LogEntry {
 const ClaimsPortal = () => {
   const [currentStep, setCurrentStep] = useState('upload');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([
     {
       id: '1',
@@ -90,15 +92,63 @@ const ClaimsPortal = () => {
     setLogs(prev => [...prev, newLog]);
   };
 
-  const handleFileUpload = (file: File) => {
+  const triggerN8nWorkflow = async () => {
+    setIsProcessing(true);
+    addLog('Triggering n8n workflow...', 'info');
+
+    try {
+      // Replace with your actual backend URL
+      const response = await fetch('/api/trigger-n8n', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'start_process',
+          timestamp: new Date().toISOString()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.resumeUrl) {
+        setResumeUrl(data.resumeUrl);
+        addLog('Workflow triggered successfully', 'success');
+        addLog(`Resume URL received: ${data.resumeUrl}`, 'info');
+      } else {
+        throw new Error('No resumeUrl received from n8n');
+      }
+    } catch (error) {
+      addLog(`Error triggering workflow: ${error.message}`, 'error');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleFileUpload = (file: File | null) => {
     setUploadedFile(file);
-    addLog(`File uploaded: ${file.name}`, 'success');
+    if (file) {
+      addLog(`File uploaded: ${file.name}`, 'success');
+    } else {
+      addLog('File removed', 'info');
+    }
+  };
+
+  const handleProcessInvoice = async () => {
+    if (!uploadedFile) return;
+    
+    addLog('Processing invoice...', 'info');
+    setCurrentStep('products');
     
     // Simulate workflow progression
     setTimeout(() => {
-      addLog('Processing invoice...', 'info');
-      setCurrentStep('products');
-    }, 1000);
+      addLog('Accessing XFX API...', 'info');
+      setCurrentStep('issues');
+    }, 2000);
   };
 
   return (
@@ -135,7 +185,10 @@ const ClaimsPortal = () => {
               currentStep={currentStep}
               uploadedFile={uploadedFile}
               onFileUpload={handleFileUpload}
-              onStepComplete={() => {}}
+              onStepComplete={handleProcessInvoice}
+              onTriggerWorkflow={triggerN8nWorkflow}
+              isProcessing={isProcessing}
+              resumeUrl={resumeUrl}
             />
             
             {/* System Logs */}

@@ -8,13 +8,19 @@ interface MainContentProps {
   uploadedFile: File | null;
   onFileUpload: (file: File) => void;
   onStepComplete: () => void;
+  onTriggerWorkflow?: () => Promise<void>;
+  isProcessing?: boolean;
+  resumeUrl?: string | null;
 }
 
 export const MainContent = ({ 
   currentStep, 
   uploadedFile, 
   onFileUpload,
-  onStepComplete 
+  onStepComplete,
+  onTriggerWorkflow,
+  isProcessing = false,
+  resumeUrl
 }: MainContentProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,7 +42,7 @@ export const MainContent = ({
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const file = files[0];
-      if (file.type === 'application/pdf' || file.type.startsWith('image/')) {
+      if (file.type === 'text/xml' || file.type === 'application/xml' || file.name.endsWith('.xml')) {
         onFileUpload(file);
       }
     }
@@ -54,6 +60,12 @@ export const MainContent = ({
   };
 
   const removeFile = () => {
+    // Create a dummy file object to clear the upload
+    const emptyEvent = { target: { files: null } } as any;
+    const fileInput = fileInputRef.current;
+    if (fileInput) {
+      fileInput.value = '';
+    }
     onFileUpload(null as any);
   };
 
@@ -65,6 +77,46 @@ export const MainContent = ({
           Follow the steps below to process your claim
         </p>
       </div>
+
+      {/* Start Process Button */}
+      {onTriggerWorkflow && !resumeUrl && (
+        <div className="bg-card rounded-lg p-6 shadow-medium border mb-6">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-semibold text-foreground">
+              Start Process
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Click to initiate the n8n workflow and get your resume URL
+            </p>
+            <Button 
+              onClick={onTriggerWorkflow}
+              disabled={isProcessing}
+              className="bg-gradient-primary hover:scale-105 transition-transform"
+            >
+              {isProcessing ? 'Starting Workflow...' : 'Start Process'}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Resume URL Display */}
+      {resumeUrl && (
+        <div className="bg-card rounded-lg p-6 shadow-medium border mb-6">
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-success">
+              Workflow Started Successfully
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Resume URL received:
+            </p>
+            <div className="bg-muted p-3 rounded-md">
+              <code className="text-xs text-foreground break-all">
+                {resumeUrl}
+              </code>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-card rounded-lg p-8 shadow-medium border">
         <div
@@ -80,7 +132,7 @@ export const MainContent = ({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.png,.jpg,.jpeg"
+            accept=".xml"
             onChange={handleFileSelect}
             className="hidden"
           />
