@@ -59,22 +59,22 @@ const ClaimsPortal = () => {
     },
     {
       id: 'products',
-      title: 'Select Products',
-      description: 'Choose affected items',
+      title: 'Sending invoice',
+      description: 'Accessing XFX API',
       status: 'pending',
       icon: 'package'
     },
     {
       id: 'issues',
-      title: 'Describe Issues',
-      description: "Tell us what's wrong",
+      title: 'Invoice Processing',
+      description: 'please waiting for replay status',
       status: 'pending',
       icon: 'message-square'
     },
     {
       id: 'resolution',
-      title: 'Resolution',
-      description: 'Get your solution',
+      title: 'Invoice Processed',
+      description: 'Status of invoice',
       status: 'pending',
       icon: 'check-circle'
     }
