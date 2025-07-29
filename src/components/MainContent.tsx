@@ -12,6 +12,7 @@ interface MainContentProps {
   onTriggerWorkflow?: () => Promise<void>;
   isProcessing?: boolean;
   resumeUrl?: string | null;
+  invoiceResponse?: any;
 }
 
 export const MainContent = ({ 
@@ -21,7 +22,8 @@ export const MainContent = ({
   onStepComplete,
   onTriggerWorkflow,
   isProcessing = false,
-  resumeUrl
+  resumeUrl,
+  invoiceResponse
 }: MainContentProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -212,29 +214,121 @@ export const MainContent = ({
     </div>
   );
 
-  const renderOtherSteps = () => (
+  const renderProductsStep = () => (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-2">
-          {currentStep === 'products' && 'Select Products'}
-          {currentStep === 'issues' && 'Describe Issues'}
-          {currentStep === 'resolution' && 'Resolution'}
-        </h2>
+        <h2 className="text-2xl font-bold text-foreground mb-2">Sending invoice</h2>
         <p className="text-muted-foreground">
-          This step is coming soon...
+          Accessing XFX API
         </p>
       </div>
 
       <div className="bg-card rounded-lg p-12 shadow-medium border text-center">
         <div className="space-y-4">
-          <div className="mx-auto h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-            <Upload className="h-8 w-8 text-muted-foreground" />
+          <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <Upload className="h-8 w-8 text-primary animate-pulse" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            Step Under Development
+            Processing Invoice
           </h3>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            This feature will be available soon. For now, you can practice with the file upload step.
+            Your invoice is being sent to the XFX API. Please wait for the response...
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderIssuesStep = () => (
+    <div className="space-y-6 animate-fade-in">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-foreground mb-2">Invoice Processing</h2>
+        <p className="text-muted-foreground">
+          Waiting for receiving confirmation
+        </p>
+      </div>
+
+      <div className="bg-card rounded-lg p-8 shadow-medium border">
+        {invoiceResponse ? (
+          <div className="space-y-4">
+            {invoiceResponse.error ? (
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-destructive mb-4">Error Processing Invoice</h3>
+                <div className="space-y-2">
+                  <p className="text-sm"><strong>Status:</strong> {invoiceResponse.status}</p>
+                  <p className="text-sm"><strong>Error Code:</strong> {invoiceResponse.errorCode}</p>
+                  <p className="text-sm"><strong>Message:</strong> {invoiceResponse.errorMessage}</p>
+                  <p className="text-sm"><strong>Timestamp:</strong> {new Date(invoiceResponse.timestamp).toLocaleString()}</p>
+                  {invoiceResponse.long_description && (
+                    <details className="mt-4">
+                      <summary className="cursor-pointer text-sm font-medium">Technical Details</summary>
+                      <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto max-h-32">
+                        {invoiceResponse.long_description}
+                      </pre>
+                    </details>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-success/10 border border-success/20 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-success mb-4">Invoice Processed Successfully</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Date Received</p>
+                    <p className="text-sm text-muted-foreground">{new Date(invoiceResponse.dateReceivedUtc).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Invoice Number</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.invoiceNo}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">External Tracking ID</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.externalTrackingId}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">XFX Tracking ID</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.xfxTrackingId}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Upload className="h-8 w-8 text-primary animate-spin" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">
+              Waiting for Response
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Processing your invoice through the XFX API. This may take a few moments...
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderResolutionStep = () => (
+    <div className="space-y-6 animate-fade-in">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-foreground mb-2">Invoice Processed</h2>
+        <p className="text-muted-foreground">
+          Status of invoice
+        </p>
+      </div>
+
+      <div className="bg-card rounded-lg p-12 shadow-medium border text-center">
+        <div className="space-y-4">
+          <div className="mx-auto h-16 w-16 rounded-full bg-success/10 flex items-center justify-center">
+            <Upload className="h-8 w-8 text-success" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">
+            Process Complete
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Your invoice has been successfully processed.
           </p>
         </div>
       </div>
@@ -245,7 +339,9 @@ export const MainContent = ({
     <div>
       {currentStep === 'start' && renderStartStep()}
       {currentStep === 'upload' && renderUploadStep()}
-      {(currentStep === 'products' || currentStep === 'issues' || currentStep === 'resolution') && renderOtherSteps()}
+      {currentStep === 'products' && renderProductsStep()}
+      {currentStep === 'issues' && renderIssuesStep()}
+      {currentStep === 'resolution' && renderResolutionStep()}
     </div>
   );
 };

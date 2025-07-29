@@ -24,6 +24,7 @@ const ClaimsPortal = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [invoiceResponse, setInvoiceResponse] = useState<any>(null);
   const [logs, setLogs] = useState<LogEntry[]>([
     {
       id: '1',
@@ -182,6 +183,19 @@ const ClaimsPortal = () => {
       addLog('Accessing XFX API...', 'info');
       setCurrentStep('issues');
       
+      // Handle the response data
+      if (Array.isArray(data) && data.length > 0) {
+        const responseData = data[0];
+        setInvoiceResponse(responseData);
+        
+        if (responseData.error) {
+          addLog(`Error from XFX API: ${responseData.errorMessage}`, 'error');
+        } else {
+          addLog(`Invoice processed successfully. Tracking ID: ${responseData.xfxTrackingId}`, 'success');
+          setCurrentStep('resolution');
+        }
+      }
+      
     } catch (error) {
       addLog(`Error sending invoice: ${error.message}`, 'error');
     } finally {
@@ -227,6 +241,7 @@ const ClaimsPortal = () => {
               onTriggerWorkflow={triggerN8nWorkflow}
               isProcessing={isProcessing}
               resumeUrl={resumeUrl}
+              invoiceResponse={invoiceResponse}
             />
             
             {/* System Logs */}
