@@ -171,6 +171,17 @@ const ClaimsPortal = () => {
       console.log('About to send FormData to:', resumeUrl);
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
+      // Test if the resume URL is accessible first
+      try {
+        const testResponse = await fetch(resumeUrl, {
+          method: 'OPTIONS',
+        });
+        console.log('OPTIONS request result:', testResponse.status);
+      } catch (optionsError) {
+        console.log('OPTIONS request failed:', optionsError);
+        addLog('Warning: Resume URL might not be properly configured for CORS', 'warning');
+      }
+      
       const response = await fetch(resumeUrl, {
         method: 'POST',
         headers: {
@@ -222,9 +233,11 @@ const ClaimsPortal = () => {
       console.error('Full error details:', error);
       console.log('Error name:', error.name);
       console.log('Error message:', error.message);
+      console.log('Resume URL that failed:', resumeUrl);
       
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        addLog('Network error: Unable to connect to n8n workflow. Please check if the ngrok tunnel is running.', 'error');
+        addLog(`Network error: Unable to connect to webhook-waiting endpoint: ${resumeUrl}`, 'error');
+        addLog('This usually means the n8n workflow webhook-waiting node is not properly configured', 'error');
       } else {
         addLog(`Error sending invoice: ${error.message}`, 'error');
       }
