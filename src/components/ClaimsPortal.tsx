@@ -113,9 +113,8 @@ const ClaimsPortal = () => {
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
-      // Use alternative CORS proxy
-      const proxyUrl = 'https://api.allorigins.win/raw?url=';
-      const response = await fetch(proxyUrl + encodeURIComponent(webhookUrl), {
+      // Call n8n webhook directly
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -172,12 +171,19 @@ const ClaimsPortal = () => {
       console.log('About to send FormData to:', resumeUrl);
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
-      // For file uploads, try direct connection first, then fallback
-      addLog('Attempting direct connection to resume URL...', 'info');
+      // Test if the resume URL is accessible first
+      try {
+        const testResponse = await fetch(resumeUrl, {
+          method: 'OPTIONS',
+        });
+        console.log('OPTIONS request result:', testResponse.status);
+      } catch (optionsError) {
+        console.log('OPTIONS request failed:', optionsError);
+        addLog('Warning: Resume URL might not be properly configured for CORS', 'warning');
+      }
       
       const response = await fetch(resumeUrl, {
         method: 'POST',
-        mode: 'no-cors', // This bypasses CORS but limits response access
         headers: {
           // Don't set Content-Type for FormData - let browser set it with boundary
         },
