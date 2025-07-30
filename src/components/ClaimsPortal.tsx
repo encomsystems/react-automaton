@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { MainContent } from './MainContent';
 import { SystemLogs } from './SystemLogs';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface ClaimStep {
   id: string;
@@ -113,29 +114,16 @@ const ClaimsPortal = () => {
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
+      console.log('Calling Supabase edge function: trigger-n8n-workflow');
+      
       // Call n8n webhook through Supabase Edge Function
-      const response = await fetch('/functions/v1/trigger-n8n-workflow', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          webhookUrl
-        }),
+      const { data, error } = await supabase.functions.invoke('trigger-n8n-workflow', {
+        body: { webhookUrl }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
-      }
-
-      const responseText = await response.text();
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('Failed to parse response as JSON:', responseText);
-        throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(`Supabase function error: ${error.message}`);
       }
       
       if (data.resumeUrl) {
