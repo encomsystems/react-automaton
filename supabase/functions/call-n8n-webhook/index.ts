@@ -39,7 +39,23 @@ serve(async (req) => {
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
 
-    const responseData = await response.json();
+    // Check if response has content before trying to parse JSON
+    const responseText = await response.text();
+    console.log('Raw response body:', responseText);
+    
+    let responseData;
+    if (responseText.trim()) {
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.log('Response is not valid JSON, treating as text:', responseText);
+        responseData = { message: responseText };
+      }
+    } else {
+      console.log('Empty response body, webhook completed successfully');
+      responseData = { success: true, message: 'Webhook completed successfully' };
+    }
+
     console.log('Final webhook response:', JSON.stringify(responseData));
 
     return new Response(JSON.stringify(responseData), {
