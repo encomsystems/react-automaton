@@ -377,6 +377,14 @@ export const MainContent = ({
       </div>
 
       <div className="bg-card rounded-lg p-8 shadow-medium border">
+        {/* Debug Section - Show raw response data */}
+        <div className="mb-6 p-4 bg-muted rounded-lg">
+          <h4 className="text-sm font-bold mb-2">Debug - Final Response Data:</h4>
+          <pre className="text-xs overflow-auto max-h-40 bg-background p-2 rounded">
+            {JSON.stringify(finalResponse, null, 2)}
+          </pre>
+        </div>
+        
         {finalResponse && Array.isArray(finalResponse) && finalResponse.length > 0 ? (
           <div className="space-y-6">
             {finalResponse.map((response: any, index: number) => (
