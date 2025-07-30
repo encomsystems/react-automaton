@@ -236,9 +236,17 @@ const XFXPortal = () => {
               addLog(`Date Received: ${receivedDate}`, 'info');
             }
             
-            // Move to Invoice Processing step immediately since we have XFX response
-            setCurrentStep('issues');
-            addLog('Invoice processing step started', 'info');
+            // Wait 3 seconds before advancing to Invoice Processing step
+            setTimeout(() => {
+              setCurrentStep('issues');
+              addLog('Invoice processing step started', 'info');
+              
+              // Wait 3 seconds then advance to final step
+              setTimeout(() => {
+                setCurrentStep('resolution');
+                addLog('Invoice processing completed', 'success');
+              }, 3000);
+            }, 3000);
           } else if (responseData.error || responseData.errorMessage) {
             // Handle error response
             setHasError(true);
@@ -255,7 +263,10 @@ const XFXPortal = () => {
             
             // Set steps to error state
             setCurrentStep('issues');
-            addLog('Invoice processing unsuccessful', 'error');
+            setTimeout(() => {
+              setCurrentStep('resolution');
+              addLog('Invoice processing unsuccessful', 'error');
+            }, 3000);
           } else {
             addLog('Waiting for XFX API response...', 'info');
           }
@@ -304,13 +315,8 @@ const XFXPortal = () => {
       // Store the final response data
       setFinalResponse(data);
       
-      // Only move to resolution step if we get a successful processing confirmation
-      if (data && (data.status === 'success' || data.ksefSubmissionStatus || data.processed)) {
-        setCurrentStep('resolution');
-        addLog('Invoice processing completed successfully', 'success');
-      } else {
-        addLog('Waiting for invoice processing confirmation...', 'info');
-      }
+      // Move to next step if successful
+      setCurrentStep('resolution');
       
     } catch (error) {
       console.error('Error calling webhook:', error);
