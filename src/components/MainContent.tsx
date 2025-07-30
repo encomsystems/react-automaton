@@ -361,7 +361,13 @@ export const MainContent = ({
     </div>
   );
 
-  const renderResolutionStep = () => (
+  const renderResolutionStep = () => {
+    console.log('Rendering resolution step');
+    console.log('finalResponse:', finalResponse);
+    console.log('finalResponse is array:', Array.isArray(finalResponse));
+    console.log('finalResponse length:', finalResponse ? finalResponse.length : 'null');
+    
+    return (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">Invoice Processed</h2>
@@ -494,6 +500,7 @@ export const MainContent = ({
       </div>
     </div>
   );
+  };
 
   return (
     <div>
