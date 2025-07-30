@@ -361,13 +361,7 @@ export const MainContent = ({
     </div>
   );
 
-  const renderResolutionStep = () => {
-    console.log('Rendering resolution step');
-    console.log('finalResponse:', finalResponse);
-    console.log('finalResponse is array:', Array.isArray(finalResponse));
-    console.log('finalResponse length:', finalResponse ? finalResponse.length : 'null');
-    
-    return (
+  const renderResolutionStep = () => (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">Invoice Processed</h2>
@@ -377,14 +371,6 @@ export const MainContent = ({
       </div>
 
       <div className="bg-card rounded-lg p-8 shadow-medium border">
-        {/* Debug Section - Show raw response data */}
-        <div className="mb-6 p-4 bg-muted rounded-lg">
-          <h4 className="text-sm font-bold mb-2">Debug - Final Response Data:</h4>
-          <pre className="text-xs overflow-auto max-h-40 bg-background p-2 rounded">
-            {JSON.stringify(finalResponse, null, 2)}
-          </pre>
-        </div>
-        
         {finalResponse && Array.isArray(finalResponse) && finalResponse.length > 0 ? (
           <div className="space-y-6">
             {finalResponse.map((response: any, index: number) => (
@@ -508,7 +494,6 @@ export const MainContent = ({
       </div>
     </div>
   );
-  };
 
   return (
     <div>

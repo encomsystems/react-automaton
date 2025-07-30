@@ -309,9 +309,7 @@ const XFXPortal = () => {
       addLog(`Final webhook response: ${JSON.stringify(data)}`, 'success');
       
       // Store the final response data
-      console.log('Setting final response data:', data);
       setFinalResponse(data);
-      console.log('Final response state set, moving to resolution');
       
       // Move to next step if successful
       setCurrentStep('resolution');

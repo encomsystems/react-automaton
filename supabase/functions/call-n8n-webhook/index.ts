@@ -41,16 +41,12 @@ serve(async (req) => {
 
     // Check if response has content before trying to parse JSON
     const responseText = await response.text();
-    console.log('=== WEBHOOK RESPONSE DEBUG ===');
     console.log('Raw response body:', responseText);
-    console.log('Response length:', responseText.length);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
     
     let responseData;
     if (responseText.trim()) {
       try {
         responseData = JSON.parse(responseText);
-        console.log('Parsed JSON data:', JSON.stringify(responseData, null, 2));
       } catch (parseError) {
         console.log('Response is not valid JSON, treating as text:', responseText);
         responseData = { message: responseText };
@@ -60,8 +56,7 @@ serve(async (req) => {
       responseData = { success: true, message: 'Webhook completed successfully' };
     }
 
-    console.log('Final webhook response data:', JSON.stringify(responseData, null, 2));
-    console.log('=== END WEBHOOK DEBUG ===');
+    console.log('Final webhook response:', JSON.stringify(responseData));
 
     return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
