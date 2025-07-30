@@ -142,6 +142,7 @@ const XFXPortal = () => {
 
     try {
       console.log('Calling n8n workflow via nginx proxy');
+      addLog('Attempting to connect to nginx proxy on port 8080...', 'info');
       
       // Call n8n webhook through nginx proxy
       const response = await fetch(webhookUrl, {
@@ -153,10 +154,12 @@ const XFXPortal = () => {
       });
 
       if (!response.ok) {
+        addLog(`HTTP error response: ${response.status} ${response.statusText}`, 'error');
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
+      addLog('Successfully received response from nginx proxy', 'success');
       
       if (data.resumeUrl) {
         // Convert the resumeUrl to use nginx proxy instead of direct n8n connection
@@ -169,7 +172,17 @@ const XFXPortal = () => {
         throw new Error('No resumeUrl received from n8n');
       }
     } catch (error) {
-      addLog(`Error triggering workflow: ${error.message}`, 'error');
+      console.error('Full error details:', error);
+      
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        addLog('Network error: Cannot connect to nginx proxy on localhost:8080', 'error');
+        addLog('Please check:', 'error');
+        addLog('1. Is nginx running on port 8080?', 'error');
+        addLog('2. Is n8n running on port 5678?', 'error');
+        addLog('3. Are you running this app locally (not on Lovable preview)?', 'error');
+      } else {
+        addLog(`Error triggering workflow: ${error.message}`, 'error');
+      }
     } finally {
       setIsProcessing(false);
     }
