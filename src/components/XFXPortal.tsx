@@ -217,9 +217,7 @@ const XFXPortal = () => {
           
           // Check if it's the expected XFX API response format
           if (responseData.xfxTrackingId && responseData.invoiceNo) {
-            addLog('Accessing XFX API...', 'info');
-            setCurrentStep('issues');
-            addLog(`Invoice processed successfully!`, 'success');
+            addLog('XFX API response received successfully!', 'success');
             addLog(`XFX Tracking ID: ${responseData.xfxTrackingId}`, 'info');
             addLog(`Invoice Number: ${responseData.invoiceNo}`, 'info');
             if (responseData.externalTrackingId) {
@@ -230,13 +228,16 @@ const XFXPortal = () => {
               addLog(`Date Received: ${receivedDate}`, 'info');
             }
             
+            // Immediately advance to Invoice Processing step
+            setCurrentStep('issues');
+            
             // Wait 5 seconds before advancing to resolution step
             setTimeout(() => {
               setCurrentStep('resolution');
             }, 5000);
           } else if (responseData.error) {
-            setCurrentStep('issues');
             addLog(`Error from XFX API: ${responseData.errorMessage || responseData.error}`, 'error');
+            setCurrentStep('issues');
           } else {
             addLog('Waiting for XFX API response...', 'info');
           }
