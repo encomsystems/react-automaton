@@ -139,8 +139,10 @@ const XFXPortal = () => {
     setIsProcessing(true);
     const webhookUrl = 'http://localhost:8080/webhook-test/invoice-postman';
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
+    console.log('Starting n8n workflow trigger...');
 
     try {
+      console.log('About to make fetch request to:', webhookUrl);
       console.log('Calling n8n workflow via nginx proxy');
       
       // Call n8n webhook directly through nginx proxy
