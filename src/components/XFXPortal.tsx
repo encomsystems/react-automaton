@@ -322,9 +322,21 @@ const XFXPortal = () => {
     }
   };
 
-  // Auto-call webhook after 2 seconds when invoice response is received
+  // Auto-call webhook after 2 seconds when invoice response is received (only if no errors)
   useEffect(() => {
-    if (invoiceResponse && !invoiceResponse.error) {
+    if (invoiceResponse) {
+      // Check if the response has errors
+      const hasErrors = Array.isArray(invoiceResponse) 
+        ? invoiceResponse.some(item => item.error === true)
+        : invoiceResponse.error === true;
+
+      if (hasErrors) {
+        addLog('Invoice processing failed - stopping workflow due to errors', 'error');
+        setCurrentStep('issues');
+        return;
+      }
+
+      // Only proceed with webhook call if no errors
       const timer = setTimeout(() => {
         callN8nWebhook();
       }, 2000);
