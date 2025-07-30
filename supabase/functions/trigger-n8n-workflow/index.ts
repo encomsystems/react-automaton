@@ -19,6 +19,8 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+        'User-Agent': 'Supabase-Edge-Function/1.0'
       },
       body: JSON.stringify({
         action: 'start_process',
