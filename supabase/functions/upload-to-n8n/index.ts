@@ -36,12 +36,26 @@ serve(async (req) => {
       body: n8nFormData,
     })
 
+    console.log(`Response status: ${response.status}`)
+    console.log(`Response headers:`, Object.fromEntries(response.headers))
+    
     if (!response.ok) {
       const errorText = await response.text()
+      console.log(`Error response body: ${errorText}`)
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`)
     }
 
-    const data = await response.json()
+    const responseText = await response.text()
+    console.log(`Raw response body: ${responseText}`)
+    
+    let data
+    try {
+      data = JSON.parse(responseText)
+      console.log(`Parsed response data:`, JSON.stringify(data, null, 2))
+    } catch (parseError) {
+      console.log(`Failed to parse JSON response: ${parseError.message}`)
+      data = { message: responseText }
+    }
     
     return new Response(
       JSON.stringify(data),
