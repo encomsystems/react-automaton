@@ -125,10 +125,18 @@ const ClaimsPortal = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse response as JSON:', responseText);
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
+      }
       
       if (data.resumeUrl) {
         setResumeUrl(data.resumeUrl);
