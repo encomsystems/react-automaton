@@ -137,12 +137,10 @@ const XFXPortal = () => {
 
   const triggerN8nWorkflow = async () => {
     setIsProcessing(true);
-    const webhookUrl = 'http://localhost:8080/webhook-test/invoice-postman';
+    const webhookUrl = 'http://localhost:5678/webhook-test/invoice-postman';
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
-    console.log('Starting n8n workflow trigger...');
 
     try {
-      console.log('About to make fetch request to:', webhookUrl);
       console.log('Calling n8n workflow via nginx proxy');
       
       // Call n8n webhook directly through nginx proxy
@@ -154,25 +152,11 @@ const XFXPortal = () => {
         body: JSON.stringify({ action: 'start' })
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-
       if (!response.ok) {
-        console.error('Response not OK:', response.status, response.statusText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const responseText = await response.text();
-      console.log('Raw response:', responseText);
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.error('Failed to parse JSON:', e);
-        // If n8n doesn't return JSON, create a mock response
-        data = { resumeUrl: `http://localhost:8080/webhook-waiting/${Date.now()}` };
-      }
+      const data = await response.json();
       
       if (data.resumeUrl) {
         setResumeUrl(data.resumeUrl);
