@@ -30,9 +30,10 @@ serve(async (req) => {
 
     console.log(`Response status: ${response.status}`)
     console.log(`Response headers:`, Object.fromEntries(response.headers.entries()))
+    console.log(`Response URL: ${response.url}`)
 
     const responseText = await response.text()
-    console.log(`Raw response body:`, responseText.substring(0, 500)) // Log first 500 chars
+    console.log(`Raw response body (first 1000 chars):`, responseText.substring(0, 1000))
     
     if (!response.ok) {
       console.error(`HTTP error! status: ${response.status}, response: ${responseText}`)
