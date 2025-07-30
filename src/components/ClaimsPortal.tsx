@@ -177,13 +177,8 @@ const ClaimsPortal = () => {
 
       console.log('Response data:', data);
       addLog('Invoice sent successfully to n8n', 'success');
-      setCurrentStep('products');
-      
-      // Simulate progression to XFX API access
-      setTimeout(() => {
-        addLog('Accessing XFX API...', 'info');
-        setCurrentStep('issues');
-      }, 2000);
+      addLog('Accessing XFX API...', 'info');
+      setCurrentStep('issues');
       
       // Handle the response data - check if it's the expected format
       if (data) {
