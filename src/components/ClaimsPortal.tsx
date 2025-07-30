@@ -48,51 +48,72 @@ const ClaimsPortal = () => {
   ]);
 
   const getSteps = (): ClaimStep[] => {
-    const baseSteps = [
+    const baseSteps: ClaimStep[] = [
       {
         id: 'start',
         title: 'Start Process',
         description: 'Initiate your claim',
-        status: 'current' as const,
+        status: 'completed',
         icon: 'play'
       }
     ];
 
     if (resumeUrl) {
-      return [
-        {
-          ...baseSteps[0],
-          status: 'completed' as const
-        },
+      const getUploadStatus = (): 'completed' | 'current' | 'pending' => {
+        if (currentStep === 'upload') return 'current';
+        if (currentStep === 'products' || currentStep === 'issues' || currentStep === 'resolution') return 'completed';
+        return 'pending';
+      };
+
+      const getProductsStatus = (): 'completed' | 'current' | 'pending' => {
+        if (currentStep === 'products') return 'current';
+        if (currentStep === 'issues' || currentStep === 'resolution') return 'completed';
+        return 'pending';
+      };
+
+      const getIssuesStatus = (): 'completed' | 'current' | 'pending' => {
+        if (currentStep === 'issues') return 'current';
+        if (currentStep === 'resolution') return 'completed';
+        return 'pending';
+      };
+
+      const getResolutionStatus = (): 'completed' | 'current' | 'pending' => {
+        if (currentStep === 'resolution') return 'current';
+        return 'pending';
+      };
+
+      const steps: ClaimStep[] = [
+        ...baseSteps,
         {
           id: 'upload',
           title: 'Upload Invoice',
           description: 'Provide xml file',
-          status: 'current' as const,
+          status: getUploadStatus(),
           icon: 'upload'
         },
         {
           id: 'products',
           title: 'Sending invoice',
           description: 'Accessing XFX API',
-          status: 'pending' as const,
+          status: getProductsStatus(),
           icon: 'package'
         },
         {
           id: 'issues',
           title: 'Invoice Processing',
           description: 'Waiting for receiving confirmation',
-          status: 'pending' as const,
+          status: getIssuesStatus(),
           icon: 'message-square'
         },
         {
           id: 'resolution',
           title: 'Invoice Processed',
           description: 'Status of invoice',
-          status: 'pending' as const,
+          status: getResolutionStatus(),
           icon: 'check-circle'
         }
       ];
+      return steps;
     }
 
     return baseSteps;

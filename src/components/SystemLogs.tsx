@@ -1,6 +1,7 @@
 import { Info, CheckCircle, AlertTriangle, XCircle, Terminal } from 'lucide-react';
 import { LogEntry } from './ClaimsPortal';
 import { cn } from '@/lib/utils';
+import { useEffect, useRef } from 'react';
 
 interface SystemLogsProps {
   logs: LogEntry[];
@@ -28,6 +29,8 @@ const bgMap = {
 };
 
 export const SystemLogs = ({ logs }: SystemLogsProps) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString('en-US', {
       hour12: false,
@@ -37,6 +40,13 @@ export const SystemLogs = ({ logs }: SystemLogsProps) => {
     });
   };
 
+  // Auto-scroll to bottom when new logs appear
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [logs]);
+
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center space-x-2">
@@ -45,7 +55,7 @@ export const SystemLogs = ({ logs }: SystemLogsProps) => {
       </div>
 
       <div className="bg-black rounded-lg p-4 shadow-medium border font-mono text-sm">
-        <div className="space-y-1 max-h-48 overflow-y-auto">
+        <div ref={scrollRef} className="space-y-1 max-h-64 overflow-y-auto">
           {logs.map((log, index) => {            
             return (
               <div 
