@@ -386,6 +386,7 @@ const XFXPortal = () => {
               resumeUrl={resumeUrl}
               invoiceResponse={invoiceResponse}
               finalResponse={finalResponse}
+              logs={logs}
             />
             
             {/* System Logs */}
