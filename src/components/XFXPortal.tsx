@@ -306,7 +306,7 @@ const XFXPortal = () => {
         throw error;
       }
 
-      addLog(`Final webhook response: ${JSON.stringify(data)}`, 'success');
+      addLog('Final webhook completed successfully', 'success');
       
       // Store the final response data
       setFinalResponse(data);
