@@ -1,8 +1,9 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Upload, File, X, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import QRCode from 'qrcode';
 
 interface MainContentProps {
   currentStep: string;
@@ -26,6 +27,7 @@ export const MainContent = ({
   invoiceResponse
 }: MainContentProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -355,6 +357,23 @@ export const MainContent = ({
     </div>
   );
 
+  useEffect(() => {
+    if (invoiceResponse && (invoiceResponse.xfxTrackingId || invoiceResponse.internalTrackID)) {
+      const qrData = JSON.stringify({
+        xfxTrackingId: invoiceResponse.xfxTrackingId,
+        invoiceNo: invoiceResponse.invoiceNo,
+        externalTrackingId: invoiceResponse.externalTrackingId,
+        internalTrackID: invoiceResponse.internalTrackID,
+        timestamp: invoiceResponse.timestamp || invoiceResponse.dateReceivedUtc,
+        status: invoiceResponse.error ? 'error' : 'success'
+      });
+
+      QRCode.toDataURL(qrData, { width: 200, margin: 2 })
+        .then(url => setQrCodeUrl(url))
+        .catch(err => console.error('QR Code generation failed:', err));
+    }
+  }, [invoiceResponse]);
+
   const renderResolutionStep = () => (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center">
@@ -365,16 +384,44 @@ export const MainContent = ({
       </div>
 
       <div className="bg-card rounded-lg p-12 shadow-medium border text-center">
-        <div className="space-y-4">
-          <div className="mx-auto h-16 w-16 rounded-full bg-success/10 flex items-center justify-center">
-            <Upload className="h-8 w-8 text-success" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            Process Complete
-          </h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Your invoice has been successfully processed.
-          </p>
+        <div className="space-y-6">
+          {invoiceResponse?.error ? (
+            <>
+              <div className="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
+                <X className="h-8 w-8 text-destructive" />
+              </div>
+              <h3 className="text-lg font-semibold text-destructive">
+                Invoice processing unsuccessful
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                There was an error processing your invoice.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="mx-auto h-16 w-16 rounded-full bg-success/10 flex items-center justify-center">
+                <Upload className="h-8 w-8 text-success" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">
+                Process Complete
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                Your invoice has been successfully processed.
+              </p>
+            </>
+          )}
+
+          {/* QR Code Display */}
+          {qrCodeUrl && (
+            <div className="space-y-4">
+              <div className="bg-background p-4 rounded-lg border">
+                <img src={qrCodeUrl} alt="Invoice QR Code" className="mx-auto" />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Scan QR code for tracking information
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
