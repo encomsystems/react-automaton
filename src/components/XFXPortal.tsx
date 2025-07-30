@@ -229,7 +229,11 @@ const XFXPortal = () => {
               const receivedDate = new Date(responseData.dateReceivedUtc).toLocaleString();
               addLog(`Date Received: ${receivedDate}`, 'info');
             }
-            setCurrentStep('resolution');
+            
+            // Wait 5 seconds before advancing to resolution step
+            setTimeout(() => {
+              setCurrentStep('resolution');
+            }, 5000);
           } else if (responseData.error) {
             setCurrentStep('issues');
             addLog(`Error from XFX API: ${responseData.errorMessage || responseData.error}`, 'error');

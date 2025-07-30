@@ -223,8 +223,8 @@ export const MainContent = ({
         </p>
       </div>
 
-      <div className="bg-card rounded-lg p-12 shadow-medium border text-center">
-        <div className="space-y-4">
+      <div className="bg-card rounded-lg p-8 shadow-medium border">
+        <div className="text-center space-y-6">
           <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
             <Upload className="h-8 w-8 text-primary animate-pulse" />
           </div>
@@ -234,6 +234,51 @@ export const MainContent = ({
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
             Your invoice is being sent to the XFX API. Please wait for the response...
           </p>
+
+          {/* File Information */}
+          {uploadedFile && (
+            <div className="bg-muted/50 rounded-lg p-4 text-left max-w-md mx-auto">
+              <h4 className="text-sm font-medium text-foreground mb-2">File Information</h4>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium">Filename:</span> {uploadedFile.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium">Size:</span> {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Response Information */}
+          {invoiceResponse && (
+            <div className="bg-muted/50 rounded-lg p-4 text-left max-w-md mx-auto">
+              <h4 className="text-sm font-medium text-foreground mb-2">Response Information</h4>
+              <div className="space-y-1">
+                {invoiceResponse.error ? (
+                  <p className="text-xs text-destructive">
+                    <span className="font-medium">Status:</span> Error - {invoiceResponse.errorMessage || invoiceResponse.error}
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-xs text-success">
+                      <span className="font-medium">Status:</span> Success
+                    </p>
+                    {invoiceResponse.externalTrackingId && (
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-medium">External ID:</span> {invoiceResponse.externalTrackingId}
+                      </p>
+                    )}
+                    {invoiceResponse.xfxTrackingId && (
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-medium">XFX ID:</span> {invoiceResponse.xfxTrackingId}
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
