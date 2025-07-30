@@ -87,16 +87,6 @@ export const Sidebar = ({ steps, currentStep, onStepClick }: SidebarProps) => {
         </div>
       </div>
 
-      {/* Invoice Preview Card */}
-      <div className="rounded-lg bg-gradient-card p-6 shadow-medium border animate-slide-in">
-        <h3 className="text-lg font-semibold text-foreground mb-3">Invoice Preview</h3>
-        <div className="aspect-[3/4] bg-muted/30 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
-          <div className="text-center text-muted-foreground">
-            <Upload className="h-8 w-8 mx-auto mb-2" />
-            <p className="text-sm">Upload an invoice to preview</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
