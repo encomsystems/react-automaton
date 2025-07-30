@@ -1,4 +1,4 @@
-import { Check, Play, Upload, Package, MessageSquare, CheckCircle } from 'lucide-react';
+import { Check, Play, Upload, Package, MessageSquare, CheckCircle, X } from 'lucide-react';
 import { ClaimStep } from './XFXPortal';
 import { cn } from '@/lib/utils';
 
@@ -30,6 +30,7 @@ export const Sidebar = ({ steps, currentStep, onStepClick }: SidebarProps) => {
             const isCompleted = step.status === 'completed';
             const isCurrent = step.status === 'current';
             const isPending = step.status === 'pending';
+            const isError = step.status === 'error';
             
             return (
               <div
@@ -39,6 +40,7 @@ export const Sidebar = ({ steps, currentStep, onStepClick }: SidebarProps) => {
                   isCompleted && "bg-success/10 border border-success/20",
                   isCurrent && "bg-primary/10 border border-primary/30 shadow-glow",
                   isPending && "bg-muted/50 border border-border",
+                  isError && "bg-destructive/10 border border-destructive/20",
                   "hover:scale-105 hover:shadow-medium"
                 )}
                 onClick={() => onStepClick(step.id)}
@@ -47,10 +49,13 @@ export const Sidebar = ({ steps, currentStep, onStepClick }: SidebarProps) => {
                   "flex h-8 w-8 items-center justify-center rounded-full mr-3 transition-colors",
                   isCompleted && "bg-success text-success-foreground",
                   isCurrent && "bg-primary text-primary-foreground animate-pulse-glow",
-                  isPending && "bg-muted text-muted-foreground"
+                  isPending && "bg-muted text-muted-foreground",
+                  isError && "bg-destructive text-destructive-foreground"
                 )}>
                   {isCompleted ? (
                     <Check className="h-4 w-4" />
+                  ) : isError ? (
+                    <X className="h-4 w-4" />
                   ) : (
                     <Icon className="h-4 w-4" />
                   )}
@@ -61,7 +66,8 @@ export const Sidebar = ({ steps, currentStep, onStepClick }: SidebarProps) => {
                     "text-sm font-medium",
                     isCompleted && "text-success",
                     isCurrent && "text-primary",
-                    isPending && "text-muted-foreground"
+                    isPending && "text-muted-foreground",
+                    isError && "text-destructive"
                   )}>
                     {step.title}
                   </h3>

@@ -8,7 +8,7 @@ export interface ClaimStep {
   id: string;
   title: string;
   description: string;
-  status: 'completed' | 'current' | 'pending';
+  status: 'completed' | 'current' | 'pending' | 'error';
   icon: string;
 }
 
@@ -25,6 +25,7 @@ const XFXPortal = () => {
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [invoiceResponse, setInvoiceResponse] = useState<any>(null);
+  const [hasError, setHasError] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([
     {
       id: '1',
@@ -58,25 +59,27 @@ const XFXPortal = () => {
     ];
 
     if (resumeUrl) {
-      const getUploadStatus = (): 'completed' | 'current' | 'pending' => {
+      const getUploadStatus = (): 'completed' | 'current' | 'pending' | 'error' => {
         if (currentStep === 'upload') return 'current';
         if (currentStep === 'products' || currentStep === 'issues' || currentStep === 'resolution') return 'completed';
         return 'pending';
       };
 
-      const getProductsStatus = (): 'completed' | 'current' | 'pending' => {
+      const getProductsStatus = (): 'completed' | 'current' | 'pending' | 'error' => {
         if (currentStep === 'products') return 'current';
         if (currentStep === 'issues' || currentStep === 'resolution') return 'completed';
         return 'pending';
       };
 
-      const getIssuesStatus = (): 'completed' | 'current' | 'pending' => {
+      const getIssuesStatus = (): 'completed' | 'current' | 'pending' | 'error' => {
+        if (hasError) return 'error';
         if (currentStep === 'issues') return 'current';
         if (currentStep === 'resolution') return 'completed';
         return 'pending';
       };
 
-      const getResolutionStatus = (): 'completed' | 'current' | 'pending' => {
+      const getResolutionStatus = (): 'completed' | 'current' | 'pending' | 'error' => {
+        if (hasError) return 'error';
         if (currentStep === 'resolution') return 'current';
         return 'pending';
       };
@@ -237,9 +240,26 @@ const XFXPortal = () => {
                 setCurrentStep('resolution');
               }, 5000);
             }, 3000);
-          } else if (responseData.error) {
+          } else if (responseData.error || responseData.errorMessage) {
+            // Handle error response
+            setHasError(true);
+            setInvoiceResponse(responseData);
             addLog(`Error from XFX API: ${responseData.errorMessage || responseData.error}`, 'error');
+            
+            // Add internalTrackID and timestamp if available
+            if (responseData.internalTrackID) {
+              addLog(`Internal Track ID: ${responseData.internalTrackID}`, 'error');
+            }
+            if (responseData.timestamp) {
+              addLog(`Timestamp: ${responseData.timestamp}`, 'error');
+            }
+            
+            // Set steps to error state
             setCurrentStep('issues');
+            setTimeout(() => {
+              setCurrentStep('resolution');
+              addLog('Invoice processing unsuccessful', 'error');
+            }, 3000);
           } else {
             addLog('Waiting for XFX API response...', 'info');
           }
