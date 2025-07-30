@@ -113,15 +113,14 @@ const ClaimsPortal = () => {
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
-      // Call n8n webhook directly
-      const response = await fetch(webhookUrl, {
+      // Call through Supabase Edge Function
+      const response = await fetch('/functions/v1/trigger-n8n-workflow', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'start_process',
-          timestamp: new Date().toISOString()
+          webhookUrl
         }),
       });
 
@@ -165,28 +164,14 @@ const ClaimsPortal = () => {
     try {
       const formData = new FormData();
       formData.append('file', uploadedFile);
-      formData.append('action', 'process_invoice');
+      formData.append('webhookUrl', resumeUrl);
       
       addLog(`Sending file to n8n workflow: ${resumeUrl}`, 'info');
-      console.log('About to send FormData to:', resumeUrl);
+      console.log('About to send FormData via Supabase proxy to:', resumeUrl);
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
-      // Test if the resume URL is accessible first
-      try {
-        const testResponse = await fetch(resumeUrl, {
-          method: 'OPTIONS',
-        });
-        console.log('OPTIONS request result:', testResponse.status);
-      } catch (optionsError) {
-        console.log('OPTIONS request failed:', optionsError);
-        addLog('Warning: Resume URL might not be properly configured for CORS', 'warning');
-      }
-      
-      const response = await fetch(resumeUrl, {
+      const response = await fetch('/functions/v1/upload-to-n8n', {
         method: 'POST',
-        headers: {
-          // Don't set Content-Type for FormData - let browser set it with boundary
-        },
         body: formData,
       });
 
