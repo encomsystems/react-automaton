@@ -11,6 +11,7 @@ interface MainContentProps {
   onFileUpload: (file: File) => void;
   onStepComplete: () => void;
   onTriggerWorkflow?: () => Promise<void>;
+  onCallWebhook?: () => Promise<void>;
   isProcessing?: boolean;
   resumeUrl?: string | null;
   invoiceResponse?: any;
@@ -22,6 +23,7 @@ export const MainContent = ({
   onFileUpload,
   onStepComplete,
   onTriggerWorkflow,
+  onCallWebhook,
   isProcessing = false,
   resumeUrl,
   invoiceResponse
@@ -337,6 +339,20 @@ export const MainContent = ({
                     <p className="text-sm text-muted-foreground">{invoiceResponse.xfxTrackingId}</p>
                   </div>
                 </div>
+              </div>
+            )}
+            
+            {/* Webhook Call Button */}
+            {invoiceResponse && !invoiceResponse.error && onCallWebhook && (
+              <div className="mt-6 flex justify-center">
+                <Button 
+                  onClick={onCallWebhook}
+                  disabled={isProcessing}
+                  className="bg-gradient-primary hover:scale-105 transition-transform"
+                  size="lg"
+                >
+                  {isProcessing ? 'Calling Webhook...' : 'Call n8n Webhook'}
+                </Button>
               </div>
             )}
           </div>

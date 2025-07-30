@@ -287,6 +287,43 @@ const XFXPortal = () => {
     }
   };
 
+  const callN8nWebhook = async (): Promise<void> => {
+    if (!resumeUrl) {
+      addLog('No resume URL available for webhook call', 'error');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      addLog('Calling n8n webhook...', 'info');
+
+      const response = await fetch(resumeUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          finalresponse: 'success'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      addLog(`Webhook response received: ${JSON.stringify(responseData)}`, 'success');
+      
+      // You can handle the webhook response here if needed
+      
+    } catch (error) {
+      console.error('Error calling webhook:', error);
+      addLog(`Error calling webhook: ${error.message}`, 'error');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -323,6 +360,7 @@ const XFXPortal = () => {
               onFileUpload={handleFileUpload}
               onStepComplete={handleProcessInvoice}
               onTriggerWorkflow={triggerN8nWorkflow}
+              onCallWebhook={callN8nWebhook}
               isProcessing={isProcessing}
               resumeUrl={resumeUrl}
               invoiceResponse={invoiceResponse}
