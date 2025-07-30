@@ -500,6 +500,33 @@ export const MainContent = ({
             </p>
           </div>
         )}
+        
+        {/* Debug Section - Show All Responses */}
+        <div className="mt-6 bg-muted/30 rounded-lg p-4 border">
+          <h4 className="text-sm font-medium text-foreground mb-3">Debug: All Responses</h4>
+          
+          {invoiceResponse && (
+            <div className="mb-4">
+              <h5 className="text-xs font-medium text-foreground mb-2">Invoice Response:</h5>
+              <pre className="text-xs bg-background p-2 rounded overflow-auto max-h-32 text-muted-foreground border">
+                {JSON.stringify(invoiceResponse, null, 2)}
+              </pre>
+            </div>
+          )}
+          
+          {finalResponse && (
+            <div className="mb-4">
+              <h5 className="text-xs font-medium text-foreground mb-2">Final Response:</h5>
+              <pre className="text-xs bg-background p-2 rounded overflow-auto max-h-32 text-muted-foreground border">
+                {JSON.stringify(finalResponse, null, 2)}
+              </pre>
+            </div>
+          )}
+          
+          {!invoiceResponse && !finalResponse && (
+            <p className="text-xs text-muted-foreground">No responses received yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );
