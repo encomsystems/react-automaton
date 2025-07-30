@@ -137,13 +137,13 @@ const XFXPortal = () => {
 
   const triggerN8nWorkflow = async () => {
     setIsProcessing(true);
-    const webhookUrl = 'http://localhost:5678/webhook-test/invoice-postman';
+    const webhookUrl = 'http://localhost:8080/webhook-test/invoice-postman';
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
       console.log('Calling n8n workflow via nginx proxy');
       
-      // Call n8n webhook directly through nginx proxy
+      // Call n8n webhook through nginx proxy
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
@@ -159,9 +159,11 @@ const XFXPortal = () => {
       const data = await response.json();
       
       if (data.resumeUrl) {
-        setResumeUrl(data.resumeUrl);
+        // Convert the resumeUrl to use nginx proxy instead of direct n8n connection
+        const proxiedResumeUrl = data.resumeUrl.replace('http://localhost:5678', 'http://localhost:8080');
+        setResumeUrl(proxiedResumeUrl);
         addLog('Workflow triggered successfully', 'success');
-        addLog(`Resume URL received: ${data.resumeUrl}`, 'info');
+        addLog(`Resume URL received: ${proxiedResumeUrl}`, 'info');
         setCurrentStep('upload');
       } else {
         throw new Error('No resumeUrl received from n8n');
