@@ -197,12 +197,17 @@ const XFXPortal = () => {
 
       console.log('Response data:', data);
       addLog('Invoice sent successfully to n8n', 'success');
-      addLog('Accessing XFX API...', 'info');
-      setCurrentStep('issues');
       
       // Handle the response data - check if it's the expected format
       if (data) {
         console.log('Processing response data:', data);
+        
+        // Check if it's just a workflow started message
+        if (data.message === "Workflow was started") {
+          addLog('Workflow started, waiting for XFX API response...', 'info');
+          // Stay in current step until we get the actual response
+          return;
+        }
         
         // If data is an array, take the first element
         const responseData = Array.isArray(data) ? data[0] : data;
@@ -212,6 +217,8 @@ const XFXPortal = () => {
           
           // Check if it's the expected XFX API response format
           if (responseData.xfxTrackingId && responseData.invoiceNo) {
+            addLog('Accessing XFX API...', 'info');
+            setCurrentStep('issues');
             addLog(`Invoice processed successfully!`, 'success');
             addLog(`XFX Tracking ID: ${responseData.xfxTrackingId}`, 'info');
             addLog(`Invoice Number: ${responseData.invoiceNo}`, 'info');
@@ -224,15 +231,16 @@ const XFXPortal = () => {
             }
             setCurrentStep('resolution');
           } else if (responseData.error) {
+            setCurrentStep('issues');
             addLog(`Error from XFX API: ${responseData.errorMessage || responseData.error}`, 'error');
           } else {
-            addLog('Invoice sent to XFX API, waiting for response...', 'info');
+            addLog('Waiting for XFX API response...', 'info');
           }
         } else {
-          addLog('Invoice sent successfully, no response data received yet', 'info');
+          addLog('Waiting for XFX API response...', 'info');
         }
       } else {
-        addLog('Invoice sent successfully, waiting for processing...', 'info');
+        addLog('Waiting for XFX API response...', 'info');
       }
       
     } catch (error) {
