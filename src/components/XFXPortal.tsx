@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { MainContent } from './MainContent';
@@ -20,7 +19,7 @@ export interface LogEntry {
   type: 'info' | 'success' | 'warning' | 'error';
 }
 
-const ClaimsPortal = () => {
+const XFXPortal = () => {
   const [currentStep, setCurrentStep] = useState('start');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
@@ -30,19 +29,19 @@ const ClaimsPortal = () => {
     {
       id: '1',
       timestamp: new Date().toISOString(),
-      message: 'Waiting for workflow to start...',
+      message: 'Waiting for XFX workflow to start...',
       type: 'info'
     },
     {
       id: '2',
       timestamp: new Date().toISOString(),
-      message: 'Claims portal initialized',
+      message: 'XFX portal initialized',
       type: 'success'
     },
     {
       id: '3',
       timestamp: new Date().toISOString(),
-      message: 'Ready to process claims',
+      message: 'Ready to process invoices',
       type: 'info'
     }
   ]);
@@ -52,7 +51,7 @@ const ClaimsPortal = () => {
       {
         id: 'start',
         title: 'Start Process',
-        description: 'Initiate your claim',
+        description: 'Initiate your XFX process',
         status: 'completed',
         icon: 'play'
       }
@@ -291,4 +290,4 @@ const ClaimsPortal = () => {
   );
 };
 
-export default ClaimsPortal;
+export default XFXPortal;

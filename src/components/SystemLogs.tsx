@@ -1,5 +1,5 @@
 import { Info, CheckCircle, AlertTriangle, XCircle, Terminal } from 'lucide-react';
-import { LogEntry } from './ClaimsPortal';
+import { LogEntry } from './XFXPortal';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
 

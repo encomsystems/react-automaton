@@ -1,7 +1,7 @@
-import ClaimsPortal from '../components/ClaimsPortal';
+import XFXPortal from '../components/XFXPortal';
 
 const Index = () => {
-  return <ClaimsPortal />;
+  return <XFXPortal />;
 };
 
 export default Index;

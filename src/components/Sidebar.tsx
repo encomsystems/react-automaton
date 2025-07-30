@@ -1,5 +1,5 @@
 import { Check, Play, Upload, Package, MessageSquare, CheckCircle } from 'lucide-react';
-import { ClaimStep } from './ClaimsPortal';
+import { ClaimStep } from './XFXPortal';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
