@@ -1,1 +1,7 @@
 project_id = "lrysfjpospcnkpdcbvdg"
+
+[functions.trigger-n8n-workflow]
+verify_jwt = false
+
+[functions.upload-to-n8n]
+verify_jwt = false
