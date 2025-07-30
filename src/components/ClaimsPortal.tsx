@@ -113,15 +113,14 @@ const ClaimsPortal = () => {
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
-      // Call n8n webhook directly
-      const response = await fetch(webhookUrl, {
+      // Call n8n webhook through Supabase Edge Function
+      const response = await fetch('/functions/v1/trigger-n8n-workflow', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'start_process',
-          timestamp: new Date().toISOString()
+          webhookUrl
         }),
       });
 
@@ -165,17 +164,14 @@ const ClaimsPortal = () => {
     try {
       const formData = new FormData();
       formData.append('file', uploadedFile);
-      formData.append('action', 'process_invoice');
+      formData.append('resumeUrl', resumeUrl);
       
       addLog(`Sending file to n8n workflow: ${resumeUrl}`, 'info');
-      console.log('About to send FormData to:', resumeUrl);
+      console.log('About to send FormData to Supabase proxy for:', resumeUrl);
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
-      const response = await fetch(resumeUrl, {
+      const response = await fetch('/functions/v1/upload-to-n8n', {
         method: 'POST',
-        headers: {
-          // Don't set Content-Type for FormData - let browser set it with boundary
-        },
         body: formData,
       });
 
