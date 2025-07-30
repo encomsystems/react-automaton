@@ -137,7 +137,7 @@ const XFXPortal = () => {
 
   const triggerN8nWorkflow = async () => {
     setIsProcessing(true);
-    const webhookUrl = 'http://localhost:8080/api/webhook-test/invoice-postman';
+    const webhookUrl = 'http://localhost:8080/webhook-test/invoice-postman';
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
