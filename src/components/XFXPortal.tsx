@@ -295,26 +295,20 @@ const XFXPortal = () => {
 
     try {
       setIsProcessing(true);
-      addLog('Calling n8n webhook...', 'info');
+      addLog('Calling n8n webhook via edge function...', 'info');
 
-      const response = await fetch(resumeUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          finalresponse: 'success'
-        }),
+      const { data, error } = await supabase.functions.invoke('call-n8n-webhook', {
+        body: { resumeUrl }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        throw error;
       }
 
-      const responseData = await response.json();
-      addLog(`Webhook response received: ${JSON.stringify(responseData)}`, 'success');
+      addLog(`Final webhook response: ${JSON.stringify(data)}`, 'success');
       
-      // You can handle the webhook response here if needed
+      // Move to next step if successful
+      setCurrentStep(currentStep + 1);
       
     } catch (error) {
       console.error('Error calling webhook:', error);
