@@ -25,6 +25,7 @@ const XFXPortal = () => {
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [invoiceResponse, setInvoiceResponse] = useState<any>(null);
+  const [finalResponse, setFinalResponse] = useState<any>(null);
   const [hasError, setHasError] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([
     {
@@ -307,8 +308,11 @@ const XFXPortal = () => {
 
       addLog(`Final webhook response: ${JSON.stringify(data)}`, 'success');
       
+      // Store the final response data
+      setFinalResponse(data);
+      
       // Move to next step if successful
-      setCurrentStep(currentStep + 1);
+      setCurrentStep('resolution');
       
     } catch (error) {
       console.error('Error calling webhook:', error);
@@ -369,6 +373,7 @@ const XFXPortal = () => {
               isProcessing={isProcessing}
               resumeUrl={resumeUrl}
               invoiceResponse={invoiceResponse}
+              finalResponse={finalResponse}
             />
             
             {/* System Logs */}
