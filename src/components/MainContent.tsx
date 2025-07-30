@@ -478,6 +478,15 @@ export const MainContent = ({
               </div>
             ))}
           </div>
+        ) : invoiceResponse && invoiceResponse.error ? (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-destructive mb-4">Invoice Processing Failed</h3>
+            <div className="space-y-2">
+              <p className="text-sm text-destructive">
+                Error from XFX API: {invoiceResponse.errorMessage || invoiceResponse.error}
+              </p>
+            </div>
+          </div>
         ) : (
           <div className="text-center space-y-4">
             <div className="mx-auto h-16 w-16 rounded-full bg-muted/10 flex items-center justify-center">
