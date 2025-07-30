@@ -163,23 +163,18 @@ const ClaimsPortal = () => {
       formData.append('resumeUrl', resumeUrl);
       
       addLog(`Sending file to n8n workflow: ${resumeUrl}`, 'info');
-      console.log('About to send FormData to Supabase proxy for:', resumeUrl);
+      console.log('About to call Supabase edge function: upload-to-n8n');
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
-      const response = await fetch('/functions/v1/upload-to-n8n', {
-        method: 'POST',
+      const { data, error } = await supabase.functions.invoke('upload-to-n8n', {
         body: formData,
       });
 
-      console.log('Response received:', { status: response.status, ok: response.ok });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log('Error response text:', errorText);
-        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(`Supabase function error: ${error.message}`);
       }
 
-      const data = await response.json();
       console.log('Response data:', data);
       addLog('Invoice sent successfully to n8n', 'success');
       addLog('Accessing XFX API...', 'info');

@@ -29,6 +29,10 @@ serve(async (req) => {
     
     const response = await fetch(resumeUrl, {
       method: 'POST',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'User-Agent': 'Supabase-Edge-Function/1.0'
+      },
       body: n8nFormData,
     })
 
