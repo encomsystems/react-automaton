@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { MainContent } from './MainContent';
 import { SystemLogs } from './SystemLogs';
-import { supabase } from '@/integrations/supabase/client';
 
 export interface ClaimStep {
   id: string;
@@ -138,21 +137,26 @@ const XFXPortal = () => {
 
   const triggerN8nWorkflow = async () => {
     setIsProcessing(true);
-    const webhookUrl = 'https://modest-stable-terrapin.ngrok-free.app/webhook-test/invoice-postman';
+    const webhookUrl = 'http://localhost:8080/api/webhook-test/invoice-postman';
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
-      console.log('Calling Supabase edge function: trigger-n8n-workflow');
+      console.log('Calling n8n workflow via nginx proxy');
       
-      // Call n8n webhook through Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('trigger-n8n-workflow', {
-        body: { webhookUrl }
+      // Call n8n webhook directly through nginx proxy
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'start' })
       });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(`Supabase function error: ${error.message}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      const data = await response.json();
       
       if (data.resumeUrl) {
         setResumeUrl(data.resumeUrl);
@@ -191,17 +195,20 @@ const XFXPortal = () => {
       formData.append('resumeUrl', resumeUrl);
       
       addLog(`Sending file to n8n workflow: ${resumeUrl}`, 'info');
-      console.log('About to call Supabase edge function: upload-to-n8n');
+      console.log('About to call n8n via nginx proxy');
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
-      const { data, error } = await supabase.functions.invoke('upload-to-n8n', {
+      // Call n8n directly through nginx proxy
+      const response = await fetch(resumeUrl, {
+        method: 'POST',
         body: formData,
       });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(`Supabase function error: ${error.message}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      const data = await response.json();
 
       console.log('Response data:', data);
       addLog('Invoice sent successfully to n8n', 'success');
@@ -300,15 +307,21 @@ const XFXPortal = () => {
 
     try {
       setIsProcessing(true);
-      addLog('Calling n8n webhook via edge function...', 'info');
+      addLog('Calling n8n webhook via nginx proxy...', 'info');
 
-      const { data, error } = await supabase.functions.invoke('call-n8n-webhook', {
-        body: { resumeUrl }
+      const response = await fetch(resumeUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'complete' })
       });
 
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      const data = await response.json();
 
       addLog('Final webhook completed successfully', 'success');
       
