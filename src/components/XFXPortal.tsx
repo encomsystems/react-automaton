@@ -235,10 +235,25 @@ const XFXPortal = () => {
             setTimeout(() => {
               setCurrentStep('issues');
               
-              // Wait 5 seconds before advancing to resolution step
-              setTimeout(() => {
-                setCurrentStep('resolution');
-              }, 5000);
+              // Wait for ksefSubmissionStatus to be "SUBMITTED"
+              const checkSubmissionStatus = () => {
+                if (responseData?.ksefSubmissionStatus === 'SUBMITTED') {
+                  addLog('Invoice submitted successfully', 'success');
+                  
+                  // Wait 3 seconds before transitioning to the next step
+                  setTimeout(() => {
+                    setCurrentStep('resolution');
+                  }, 3000);
+                } else {
+                  addLog(`Waiting for submission... Current status: ${responseData?.ksefSubmissionStatus || 'Unknown'}`, 'info');
+                  
+                  // Check again after 2 seconds
+                  setTimeout(checkSubmissionStatus, 2000);
+                }
+              };
+              
+              // Start checking the submission status
+              checkSubmissionStatus();
             }, 3000);
           } else if (responseData.error || responseData.errorMessage) {
             // Handle error response
