@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { MainContent } from './MainContent';
 import { SystemLogs } from './SystemLogs';
@@ -317,6 +317,17 @@ const XFXPortal = () => {
       setIsProcessing(false);
     }
   };
+
+  // Auto-call webhook after 2 seconds when invoice response is received
+  useEffect(() => {
+    if (invoiceResponse && !invoiceResponse.error) {
+      const timer = setTimeout(() => {
+        callN8nWebhook();
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [invoiceResponse]);
 
   return (
     <div className="min-h-screen bg-gray-100">

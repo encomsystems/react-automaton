@@ -341,20 +341,6 @@ export const MainContent = ({
                 </div>
               </div>
             )}
-            
-            {/* Webhook Call Button */}
-            {invoiceResponse && !invoiceResponse.error && onCallWebhook && (
-              <div className="mt-6 flex justify-center">
-                <Button 
-                  onClick={onCallWebhook}
-                  disabled={isProcessing}
-                  className="bg-gradient-primary hover:scale-105 transition-transform"
-                  size="lg"
-                >
-                  {isProcessing ? 'Calling Webhook...' : 'Call n8n Webhook'}
-                </Button>
-              </div>
-            )}
           </div>
         ) : (
           <div className="text-center space-y-4">
