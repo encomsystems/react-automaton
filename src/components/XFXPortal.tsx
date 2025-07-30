@@ -228,13 +228,15 @@ const XFXPortal = () => {
               addLog(`Date Received: ${receivedDate}`, 'info');
             }
             
-            // Immediately advance to Invoice Processing step
-            setCurrentStep('issues');
-            
-            // Wait 5 seconds before advancing to resolution step
+            // Wait 3 seconds before advancing to Invoice Processing step
             setTimeout(() => {
-              setCurrentStep('resolution');
-            }, 5000);
+              setCurrentStep('issues');
+              
+              // Wait 5 seconds before advancing to resolution step
+              setTimeout(() => {
+                setCurrentStep('resolution');
+              }, 5000);
+            }, 3000);
           } else if (responseData.error) {
             addLog(`Error from XFX API: ${responseData.errorMessage || responseData.error}`, 'error');
             setCurrentStep('issues');
