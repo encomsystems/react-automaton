@@ -1,7 +1,8 @@
 
 import { useState, useRef, useEffect } from 'react';
-import { Upload, File, X, Play } from 'lucide-react';
+import { Upload, File, X, Play, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import QRCode from 'qrcode';
 
@@ -32,6 +33,7 @@ export const MainContent = ({
 }: MainContentProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [isDebugOpen, setIsDebugOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -502,31 +504,39 @@ export const MainContent = ({
         )}
         
         {/* Debug Section - Show All Responses */}
-        <div className="mt-6 bg-muted/30 rounded-lg p-4 border">
-          <h4 className="text-sm font-medium text-foreground mb-3">Debug: All Responses</h4>
-          
-          {invoiceResponse && (
-            <div className="mb-4">
-              <h5 className="text-xs font-medium text-foreground mb-2">Invoice Response:</h5>
-              <pre className="text-xs bg-background p-2 rounded overflow-auto max-h-32 text-muted-foreground border">
-                {JSON.stringify(invoiceResponse, null, 2)}
-              </pre>
-            </div>
-          )}
-          
-          {finalResponse && (
-            <div className="mb-4">
-              <h5 className="text-xs font-medium text-foreground mb-2">Final Response:</h5>
-              <pre className="text-xs bg-background p-2 rounded overflow-auto max-h-32 text-muted-foreground border">
-                {JSON.stringify(finalResponse, null, 2)}
-              </pre>
-            </div>
-          )}
-          
-          {!invoiceResponse && !finalResponse && (
-            <p className="text-xs text-muted-foreground">No responses received yet.</p>
-          )}
-        </div>
+        <Collapsible open={isDebugOpen} onOpenChange={setIsDebugOpen}>
+          <div className="mt-6 bg-muted/30 rounded-lg border">
+            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+              <h4 className="text-sm font-medium text-foreground">Debug: All Responses</h4>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", isDebugOpen && "rotate-180")} />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="p-4 pt-0">
+                {invoiceResponse && (
+                  <div className="mb-4">
+                    <h5 className="text-xs font-medium text-foreground mb-2">Invoice Response:</h5>
+                    <pre className="text-xs bg-background p-2 rounded overflow-auto max-h-32 text-muted-foreground border">
+                      {JSON.stringify(invoiceResponse, null, 2)}
+                    </pre>
+                  </div>
+                )}
+                
+                {finalResponse && (
+                  <div className="mb-4">
+                    <h5 className="text-xs font-medium text-foreground mb-2">Final Response:</h5>
+                    <pre className="text-xs bg-background p-2 rounded overflow-auto max-h-32 text-muted-foreground border">
+                      {JSON.stringify(finalResponse, null, 2)}
+                    </pre>
+                  </div>
+                )}
+                
+                {!invoiceResponse && !finalResponse && (
+                  <p className="text-xs text-muted-foreground">No responses received yet.</p>
+                )}
+              </div>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
       </div>
     </div>
   );
