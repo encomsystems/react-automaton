@@ -81,9 +81,8 @@ const XFXPortal = () => {
 
       const getResolutionStatus = (): 'completed' | 'current' | 'pending' | 'error' => {
         if (hasError) return 'error';
-        // Check if we have a successful invoice response with tracking IDs or if ksefSubmissionStatus is SUBMITTED
-        if ((invoiceResponse && invoiceResponse.xfxTrackingId && invoiceResponse.invoiceNo) || 
-            (finalResponse && finalResponse.ksefSubmissionStatus === 'SUBMITTED')) {
+        // Check if we're at resolution step AND have a successful invoice response
+        if (currentStep === 'resolution' && invoiceResponse && invoiceResponse.xfxTrackingId && invoiceResponse.invoiceNo) {
           return 'completed';
         }
         if (currentStep === 'resolution') return 'current';
