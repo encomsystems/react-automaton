@@ -16,7 +16,6 @@ interface MainContentProps {
   resumeUrl?: string | null;
   invoiceResponse?: any;
   finalResponse?: any;
-  logs?: Array<{ id: string; timestamp: string; message: string; type: 'info' | 'success' | 'error' | 'warning' }>;
 }
 
 export const MainContent = ({ 
@@ -29,8 +28,7 @@ export const MainContent = ({
   isProcessing = false,
   resumeUrl,
   invoiceResponse,
-  finalResponse,
-  logs = []
+  finalResponse
 }: MainContentProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
@@ -292,79 +290,26 @@ export const MainContent = ({
     </div>
   );
 
-  const renderIssuesStep = () => {
-    // Check if we have error data
-    const hasErrors = invoiceResponse && (
-      Array.isArray(invoiceResponse) 
-        ? invoiceResponse.some(item => item.error === true)
-        : invoiceResponse.error === true
-    );
+  const renderIssuesStep = () => (
+    <div className="space-y-6 animate-fade-in">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-foreground mb-2">Invoice Processing</h2>
+        <p className="text-muted-foreground">
+          Waiting for receiving confirmation
+        </p>
+      </div>
 
-    return (
-      <div className="space-y-6 animate-fade-in">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-2">
-            {hasErrors ? "Invoice Processed" : "Invoice Processing"}
-          </h2>
-          <p className="text-muted-foreground">
-            {hasErrors ? "Processing completed with errors" : "Waiting for receiving confirmation"}
-          </p>
-        </div>
-
-        <div className="bg-card rounded-lg p-8 shadow-medium border">
-          {invoiceResponse ? (
-            <div className="space-y-4">
-              {hasErrors ? (
-                <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-destructive mb-4">Invoice Processing Failed</h3>
-                  
-                  {/* Error Logs Display */}
-                  <div className="bg-background rounded-lg p-4 font-mono text-sm">
-                    <div className="space-y-1">
-                      {/* Show relevant error logs */}
-                      {logs
-                        .filter(log => log.type === 'error' && (
-                          log.message.includes('Error from XFX API') ||
-                          log.message.includes('Timestamp:') ||
-                          log.message.includes('Invoice processing failed')
-                        ))
-                        .slice(-10) // Show last 10 error logs
-                        .map((log, index) => (
-                          <div key={log.id || index} className="text-destructive">
-                            [{new Date(log.timestamp).toLocaleTimeString()}] {log.message}
-                          </div>
-                        ))
-                      }
-                      
-                      {/* Show additional error details from response */}
-                      {Array.isArray(invoiceResponse) && invoiceResponse.map((response, index) => (
-                        response.error && (
-                          <div key={index} className="mt-2">
-                            <div className="text-destructive">
-                              [{new Date(response.timestamp).toLocaleTimeString()}] Error from XFX API: {response.errorMessage}
-                            </div>
-                            <div className="text-destructive">
-                              [{new Date(response.timestamp).toLocaleTimeString()}] Timestamp: {response.timestamp}
-                            </div>
-                          </div>
-                        )
-                      ))}
-                      
-                      {/* Show error for non-array response */}
-                      {!Array.isArray(invoiceResponse) && invoiceResponse.error && (
-                        <div>
-                          <div className="text-destructive">
-                            [{new Date(invoiceResponse.timestamp).toLocaleTimeString()}] Error from XFX API: {invoiceResponse.errorMessage}
-                          </div>
-                          <div className="text-destructive">
-                            [{new Date(invoiceResponse.timestamp).toLocaleTimeString()}] Timestamp: {invoiceResponse.timestamp}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Technical Details */}
+      <div className="bg-card rounded-lg p-8 shadow-medium border">
+        {invoiceResponse ? (
+          <div className="space-y-4">
+            {invoiceResponse.error ? (
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-destructive mb-4">Error Processing Invoice</h3>
+                <div className="space-y-2">
+                  <p className="text-sm"><strong>Status:</strong> {invoiceResponse.status}</p>
+                  <p className="text-sm"><strong>Error Code:</strong> {invoiceResponse.errorCode}</p>
+                  <p className="text-sm"><strong>Message:</strong> {invoiceResponse.errorMessage}</p>
+                  <p className="text-sm"><strong>Timestamp:</strong> {new Date(invoiceResponse.timestamp).toLocaleString()}</p>
                   {invoiceResponse.long_description && (
                     <details className="mt-4">
                       <summary className="cursor-pointer text-sm font-medium">Technical Details</summary>
@@ -374,47 +319,47 @@ export const MainContent = ({
                     </details>
                   )}
                 </div>
-              ) : (
-                <div className="bg-success/10 border border-success/20 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-success mb-4">Invoice Processed Successfully</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Date Received</p>
-                      <p className="text-sm text-muted-foreground">{new Date(invoiceResponse.dateReceivedUtc).toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Invoice Number</p>
-                      <p className="text-sm text-muted-foreground">{invoiceResponse.invoiceNo}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">External Tracking ID</p>
-                      <p className="text-sm text-muted-foreground">{invoiceResponse.externalTrackingId}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">XFX Tracking ID</p>
-                      <p className="text-sm text-muted-foreground">{invoiceResponse.xfxTrackingId}</p>
-                    </div>
+              </div>
+            ) : (
+              <div className="bg-success/10 border border-success/20 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-success mb-4">Invoice Processed Successfully</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Date Received</p>
+                    <p className="text-sm text-muted-foreground">{new Date(invoiceResponse.dateReceivedUtc).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Invoice Number</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.invoiceNo}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">External Tracking ID</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.externalTrackingId}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">XFX Tracking ID</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.xfxTrackingId}</p>
                   </div>
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center space-y-4">
-              <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Upload className="h-8 w-8 text-primary animate-spin" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground">
-                Waiting for Response
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Processing your invoice through the XFX API. This may take a few moments...
-              </p>
+            )}
+          </div>
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Upload className="h-8 w-8 text-primary animate-spin" />
             </div>
-          )}
-        </div>
+            <h3 className="text-lg font-semibold text-foreground">
+              Waiting for Response
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Processing your invoice through the XFX API. This may take a few moments...
+            </p>
+          </div>
+        )}
       </div>
-    );
-  };
+    </div>
+  );
 
   const renderResolutionStep = () => (
     <div className="space-y-6 animate-fade-in">
