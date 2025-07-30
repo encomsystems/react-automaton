@@ -113,14 +113,15 @@ const ClaimsPortal = () => {
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
-      // Call through Supabase Edge Function
-      const response = await fetch('/functions/v1/trigger-n8n-workflow', {
+      // Call n8n webhook directly
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          webhookUrl
+          action: 'start_process',
+          timestamp: new Date().toISOString()
         }),
       });
 
@@ -164,14 +165,17 @@ const ClaimsPortal = () => {
     try {
       const formData = new FormData();
       formData.append('file', uploadedFile);
-      formData.append('webhookUrl', resumeUrl);
+      formData.append('action', 'process_invoice');
       
       addLog(`Sending file to n8n workflow: ${resumeUrl}`, 'info');
-      console.log('About to send FormData via Supabase proxy to:', resumeUrl);
+      console.log('About to send FormData to:', resumeUrl);
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
-      const response = await fetch('/functions/v1/upload-to-n8n', {
+      const response = await fetch(resumeUrl, {
         method: 'POST',
+        headers: {
+          // Don't set Content-Type for FormData - let browser set it with boundary
+        },
         body: formData,
       });
 
@@ -218,11 +222,9 @@ const ClaimsPortal = () => {
       console.error('Full error details:', error);
       console.log('Error name:', error.name);
       console.log('Error message:', error.message);
-      console.log('Resume URL that failed:', resumeUrl);
       
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        addLog(`Network error: Unable to connect to webhook-waiting endpoint: ${resumeUrl}`, 'error');
-        addLog('This usually means the n8n workflow webhook-waiting node is not properly configured', 'error');
+        addLog('Network error: Unable to connect to n8n workflow. Please check if the ngrok tunnel is running.', 'error');
       } else {
         addLog(`Error sending invoice: ${error.message}`, 'error');
       }
