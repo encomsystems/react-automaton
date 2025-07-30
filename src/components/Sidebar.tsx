@@ -18,9 +18,9 @@ const iconMap = {
 
 export const Sidebar = ({ steps, currentStep, onStepClick }: SidebarProps) => {
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="h-full animate-fade-in">
       {/* Claim Status Card */}
-      <div className="rounded-lg bg-gradient-card p-6 shadow-medium border">
+      <div className="h-full rounded-lg bg-gradient-card p-6 shadow-medium border flex flex-col">
         <h2 className="text-lg font-semibold text-foreground mb-2">Invoice workflow status</h2>
         <p className="text-sm text-muted-foreground">Track your progress</p>
         
