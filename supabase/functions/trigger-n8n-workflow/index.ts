@@ -26,20 +26,22 @@ serve(async (req) => {
       }),
     })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error(`HTTP error! status: ${response.status}, response: ${errorText}`)
-      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`)
-    }
+    console.log(`Response status: ${response.status}`)
+    console.log(`Response headers:`, Object.fromEntries(response.headers.entries()))
 
     const responseText = await response.text()
-    console.log(`Response from n8n: ${responseText}`)
+    console.log(`Raw response body:`, responseText.substring(0, 500)) // Log first 500 chars
+    
+    if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}, response: ${responseText}`)
+      throw new Error(`HTTP error! status: ${response.status} - ${responseText.substring(0, 200)}`)
+    }
     
     let data
     try {
       data = JSON.parse(responseText)
     } catch (error) {
-      console.error('Failed to parse JSON response:', responseText)
+      console.error('Failed to parse JSON response:', responseText.substring(0, 200))
       // If it's not JSON, return the text response
       data = { message: responseText, success: true }
     }
