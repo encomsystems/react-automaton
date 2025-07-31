@@ -144,13 +144,25 @@ const XFXPortal = () => {
       console.log('Calling n8n workflow via nginx proxy');
       addLog('Attempting to connect to nginx proxy on port 8080...', 'info');
       
-      // Call n8n webhook through nginx proxy
-      const response = await fetch(webhookUrl, {
+      // Add more detailed debugging
+      console.log('Fetch URL:', webhookUrl);
+      console.log('Fetch options:', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ action: 'start' })
+      });
+      
+      // Call n8n webhook through nginx proxy with more explicit options
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'start' }),
+        mode: 'cors',
+        credentials: 'omit'
       });
 
       if (!response.ok) {
@@ -175,11 +187,25 @@ const XFXPortal = () => {
       console.error('Full error details:', error);
       
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        addLog('CORS/Network error detected. Trying simple connection test...', 'error');
+        
+        // Try a simple GET request to test connectivity
+        try {
+          const testResponse = await fetch('http://localhost:8080', {
+            method: 'GET',
+            mode: 'no-cors'
+          });
+          addLog('Basic connection to nginx works, this is likely a CORS issue', 'warning');
+          addLog('Try updating nginx CORS headers to allow specific origin', 'warning');
+        } catch (testError) {
+          addLog('Cannot connect to nginx at all - nginx may not be running on port 8080', 'error');
+        }
+        
         addLog('Network error: Cannot connect to nginx proxy on localhost:8080', 'error');
         addLog('Please check:', 'error');
         addLog('1. Is nginx running on port 8080?', 'error');
         addLog('2. Is n8n running on port 5678?', 'error');
-        addLog('3. Are you running this app locally (not on Lovable preview)?', 'error');
+        addLog('3. CORS headers in nginx config allow http://localhost:8081?', 'error');
       } else {
         addLog(`Error triggering workflow: ${error.message}`, 'error');
       }
