@@ -230,17 +230,16 @@ const XFXPortal = () => {
   };
 
   const handleProcessInvoice = async () => {
-    console.log('handleProcessInvoice called');
-    console.log('uploadedFile:', uploadedFile);
-    console.log('resumeUrl:', resumeUrl);
+    addLog('DEBUG: handleProcessInvoice function called', 'info');
+    addLog(`DEBUG: uploadedFile exists: ${!!uploadedFile}`, 'info');
+    addLog(`DEBUG: resumeUrl exists: ${!!resumeUrl}`, 'info');
     
     if (!uploadedFile || !resumeUrl) {
-      console.log('Missing uploadedFile or resumeUrl - returning early');
-      addLog('Missing file or resume URL', 'error');
+      addLog('ERROR: Missing file or resume URL - stopping process', 'error');
       return;
     }
     
-    console.log('Starting processing...');
+    addLog('DEBUG: Starting invoice processing...', 'info');
     setIsProcessing(true);
     addLog('Processing invoice...', 'info');
     setCurrentStep('products');
