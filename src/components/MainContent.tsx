@@ -373,112 +373,116 @@ export const MainContent = ({
       </div>
 
       <div className="bg-card rounded-lg p-8 shadow-medium border">
-        {finalResponse && Array.isArray(finalResponse) && finalResponse.length > 0 ? (
+        {invoiceResponse ? (
           <div className="space-y-6">
-            {finalResponse.map((response: any, index: number) => (
-              <div key={index} className="space-y-4">
-                {/* Status Header */}
-                <div className="text-center space-y-4">
-                  <div className="mx-auto h-16 w-16 rounded-full bg-success/10 flex items-center justify-center">
-                    <Upload className="h-8 w-8 text-success" />
+            <div className="space-y-4">
+              {/* Status Header */}
+              <div className="text-center space-y-4">
+                <div className="mx-auto h-16 w-16 rounded-full bg-success/10 flex items-center justify-center">
+                  <Upload className="h-8 w-8 text-success" />
+                </div>
+                <h3 className="text-lg font-semibold text-success">
+                  Invoice Successfully Submitted
+                </h3>
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-success/10 text-success text-sm font-medium">
+                  Status: {invoiceResponse.ksefSubmissionStatus || invoiceResponse.status || 'SUBMITTED'}
+                </div>
+              </div>
+
+              {/* Main Information Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">KSEF Number</p>
+                    <p className="text-sm text-muted-foreground font-mono">{invoiceResponse.ksefNumber || 'N/A'}</p>
                   </div>
-                  <h3 className="text-lg font-semibold text-success">
-                    Invoice Successfully Submitted
-                  </h3>
-                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-success/10 text-success text-sm font-medium">
-                    Status: {response.ksefSubmissionStatus || 'SUBMITTED'}
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Invoice Number</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.number || invoiceResponse.invoiceNo || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Total Amount</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.totalAmount || 'N/A'} {invoiceResponse.currencyCode || ''}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Issue Date</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.issueDate ? new Date(invoiceResponse.issueDate).toLocaleDateString() : 'N/A'}</p>
                   </div>
                 </div>
-
-                {/* Main Information Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">KSEF Number</p>
-                      <p className="text-sm text-muted-foreground font-mono">{response.ksefNumber}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Invoice Number</p>
-                      <p className="text-sm text-muted-foreground">{response.number}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Total Amount</p>
-                      <p className="text-sm text-muted-foreground">{response.totalAmount} {response.currencyCode}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Issue Date</p>
-                      <p className="text-sm text-muted-foreground">{new Date(response.issueDate).toLocaleDateString()}</p>
-                    </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Company</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.subject1Name || 'N/A'}</p>
                   </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Company</p>
-                      <p className="text-sm text-muted-foreground">{response.subject1Name}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">VAT Number</p>
-                      <p className="text-sm text-muted-foreground">{response.subject1VatNumber}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Processing Mode</p>
-                      <p className="text-sm text-muted-foreground">{response.processingMode}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Date Received</p>
-                      <p className="text-sm text-muted-foreground">{new Date(response.dateReceivedUtc).toLocaleString()}</p>
-                    </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">VAT Number</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.subject1VatNumber || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Processing Mode</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.processingMode || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Date Received</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.dateReceivedUtc ? new Date(invoiceResponse.dateReceivedUtc).toLocaleString() : 'N/A'}</p>
                   </div>
                 </div>
+              </div>
 
-                {/* QR Code Section */}
-                {response.qrCode && (
-                  <div className="mt-6 text-center space-y-4">
-                    <div className="bg-background p-6 rounded-lg border">
-                      <div className="space-y-4">
-                        <h4 className="text-lg font-semibold text-foreground">Government Verification</h4>
-                        <div className="bg-white p-4 rounded-lg inline-block">
-                          <img 
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(response.qrCode)}`}
-                            alt="Government QR Code" 
-                            className="mx-auto"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-sm text-muted-foreground">
-                            Official government verification QR code
+              {/* QR Code Section */}
+              {invoiceResponse.qrCode && (
+                <div className="mt-6 text-center space-y-4">
+                  <div className="bg-background p-6 rounded-lg border">
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-foreground">Government Verification</h4>
+                      <div className="bg-white p-4 rounded-lg inline-block">
+                        <img 
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(invoiceResponse.qrCode)}`}
+                          alt="Government QR Code" 
+                          className="mx-auto"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          Official government verification QR code
+                        </p>
+                        <div className="bg-muted p-3 rounded-md">
+                          <p className="text-xs text-foreground break-all">
+                            {invoiceResponse.qrCode}
                           </p>
-                          <div className="bg-muted p-3 rounded-md">
-                            <p className="text-xs text-foreground break-all">
-                              {response.qrCode}
-                            </p>
-                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Additional Details */}
-                <div className="mt-6 bg-muted/50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-foreground mb-3">Additional Information</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              {/* Additional Details */}
+              <div className="mt-6 bg-muted/50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-foreground mb-3">Additional Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                  {invoiceResponse.ksefDate && (
                     <div>
                       <p className="font-medium text-foreground">KSEF Date</p>
-                      <p className="text-muted-foreground">{new Date(response.ksefDate).toLocaleString()}</p>
+                      <p className="text-muted-foreground">{new Date(invoiceResponse.ksefDate).toLocaleString()}</p>
                     </div>
+                  )}
+                  {invoiceResponse.saleDate && (
                     <div>
                       <p className="font-medium text-foreground">Sale Date</p>
-                      <p className="text-muted-foreground">{new Date(response.saleDate).toLocaleDateString()}</p>
+                      <p className="text-muted-foreground">{new Date(invoiceResponse.saleDate).toLocaleDateString()}</p>
                     </div>
+                  )}
+                  {invoiceResponse.schemaVersion && (
                     <div>
                       <p className="font-medium text-foreground">Schema Version</p>
-                      <p className="text-muted-foreground">{response.schemaVersion}</p>
+                      <p className="text-muted-foreground">{invoiceResponse.schemaVersion}</p>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         ) : invoiceResponse && invoiceResponse.error ? (
           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
