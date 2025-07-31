@@ -245,17 +245,35 @@ const XFXPortal = () => {
       console.log('About to call n8n via nginx proxy');
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
-      // Call n8n directly through nginx proxy
+      // Call n8n directly
+      console.log('About to fetch:', resumeUrl);
+      console.log('FormData contents:', { fileName: uploadedFile.name, fileSize: uploadedFile.size });
+      
       const response = await fetch(resumeUrl, {
         method: 'POST',
         body: formData,
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      console.log('Response ok:', response.ok);
+
       if (!response.ok) {
+        addLog(`HTTP error! status: ${response.status} ${response.statusText}`, 'error');
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
+      const responseText = await response.text();
+      console.log('Raw response text:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.log('JSON parse error:', parseError);
+        addLog(`Response is not valid JSON: ${responseText}`, 'error');
+        throw new Error('Invalid JSON response from n8n');
+      }
 
       console.log('Response data:', data);
       addLog('Invoice sent successfully to n8n', 'success');
