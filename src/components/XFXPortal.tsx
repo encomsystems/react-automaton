@@ -172,16 +172,35 @@ const XFXPortal = () => {
       
       const data = await response.json();
       addLog('Successfully received response from nginx proxy', 'success');
+      addLog(`Response data: ${JSON.stringify(data, null, 2)}`, 'info');
       
-      if (data.resumeUrl) {
+      // Handle different response formats from n8n
+      let resumeUrlValue = null;
+      
+      if (Array.isArray(data) && data.length > 0) {
+        // If response is an array, look for resumeUrl in the first element or webhookUrl
+        const firstItem = data[0];
+        resumeUrlValue = firstItem.resumeUrl || firstItem.webhookUrl;
+      } else if (data.resumeUrl) {
+        resumeUrlValue = data.resumeUrl;
+      } else if (data.webhookUrl) {
+        resumeUrlValue = data.webhookUrl;
+      }
+      
+      if (resumeUrlValue) {
         // Convert the resumeUrl to use nginx proxy instead of direct n8n connection
-        const proxiedResumeUrl = data.resumeUrl.replace('http://localhost:5678', 'http://localhost:8080');
+        const proxiedResumeUrl = resumeUrlValue.replace('http://localhost:5678', 'http://localhost:8080');
         setResumeUrl(proxiedResumeUrl);
         addLog('Workflow triggered successfully', 'success');
         addLog(`Resume URL received: ${proxiedResumeUrl}`, 'info');
         setCurrentStep('upload');
       } else {
-        throw new Error('No resumeUrl received from n8n');
+        addLog('No resumeUrl or webhookUrl found in response', 'warning');
+        addLog('Using default webhook URL for file upload', 'info');
+        // Fallback to the original webhook URL but proxied
+        const fallbackUrl = webhookUrl;
+        setResumeUrl(fallbackUrl);
+        setCurrentStep('upload');
       }
     } catch (error) {
       console.error('Full error details:', error);
