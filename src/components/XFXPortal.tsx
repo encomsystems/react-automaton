@@ -337,7 +337,7 @@ const XFXPortal = () => {
       console.log('Error message:', error.message);
       
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        addLog('Network error: Unable to connect to n8n workflow. Please check if the ngrok tunnel is running.', 'error');
+        addLog('Network error: Unable to connect to n8n workflow. Please check if n8n is still running on localhost:5678.', 'error');
       } else {
         addLog(`Error sending invoice: ${error.message}`, 'error');
       }
