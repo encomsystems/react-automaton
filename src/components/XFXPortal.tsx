@@ -137,12 +137,12 @@ const XFXPortal = () => {
 
   const triggerN8nWorkflow = async () => {
     setIsProcessing(true);
-    const webhookUrl = 'http://localhost:8080/webhook-test/invoice-postman';
+    const webhookUrl = 'http://localhost:5678/webhook-test/invoice-postman';
     addLog(`Triggering n8n workflow at: ${webhookUrl}`, 'info');
 
     try {
-      console.log('Calling n8n workflow via nginx proxy');
-      addLog('Attempting to connect to nginx proxy on port 8080...', 'info');
+      console.log('Calling n8n workflow directly');
+      addLog('Attempting to connect to n8n directly on port 5678...', 'info');
       
       // Add more detailed debugging
       console.log('Fetch URL:', webhookUrl);
@@ -171,7 +171,7 @@ const XFXPortal = () => {
       }
       
       const data = await response.json();
-      addLog('Successfully received response from nginx proxy', 'success');
+      addLog('Successfully received response from n8n', 'success');
       addLog(`Response data: ${JSON.stringify(data, null, 2)}`, 'info');
       
       // Handle different response formats from n8n
@@ -188,18 +188,16 @@ const XFXPortal = () => {
       }
       
       if (resumeUrlValue) {
-        // Convert the resumeUrl to use nginx proxy instead of direct n8n connection
-        const proxiedResumeUrl = resumeUrlValue.replace('http://localhost:5678', 'http://localhost:8080');
-        setResumeUrl(proxiedResumeUrl);
+        // Use the direct n8n URL
+        setResumeUrl(resumeUrlValue);
         addLog('Workflow triggered successfully', 'success');
-        addLog(`Resume URL received: ${proxiedResumeUrl}`, 'info');
+        addLog(`Resume URL received: ${resumeUrlValue}`, 'info');
         setCurrentStep('upload');
       } else {
         addLog('No resumeUrl or webhookUrl found in response', 'warning');
         addLog('Using default webhook URL for file upload', 'info');
-        // Fallback to the original webhook URL but proxied
-        const fallbackUrl = webhookUrl;
-        setResumeUrl(fallbackUrl);
+        // Fallback to the original webhook URL
+        setResumeUrl(webhookUrl);
         setCurrentStep('upload');
       }
     } catch (error) {
@@ -209,22 +207,11 @@ const XFXPortal = () => {
         addLog('CORS/Network error detected. Trying simple connection test...', 'error');
         
         // Try a simple GET request to test connectivity
-        try {
-          const testResponse = await fetch('http://localhost:8080', {
-            method: 'GET',
-            mode: 'no-cors'
-          });
-          addLog('Basic connection to nginx works, this is likely a CORS issue', 'warning');
-          addLog('Try updating nginx CORS headers to allow specific origin', 'warning');
-        } catch (testError) {
-          addLog('Cannot connect to nginx at all - nginx may not be running on port 8080', 'error');
-        }
-        
-        addLog('Network error: Cannot connect to nginx proxy on localhost:8080', 'error');
+        addLog('Network error: Cannot connect to n8n on localhost:5678', 'error');
         addLog('Please check:', 'error');
-        addLog('1. Is nginx running on port 8080?', 'error');
-        addLog('2. Is n8n running on port 5678?', 'error');
-        addLog('3. CORS headers in nginx config allow http://localhost:8081?', 'error');
+        addLog('1. Is n8n running on port 5678?', 'error');
+        addLog('2. Does n8n have CORS enabled for http://localhost:8081?', 'error');
+        addLog('3. Is the webhook URL correct in n8n workflow?', 'error');
       } else {
         addLog(`Error triggering workflow: ${error.message}`, 'error');
       }
@@ -367,7 +354,7 @@ const XFXPortal = () => {
 
     try {
       setIsProcessing(true);
-      addLog('Calling n8n webhook via nginx proxy...', 'info');
+      addLog('Calling n8n webhook directly...', 'info');
 
       const response = await fetch(resumeUrl, {
         method: 'POST',
