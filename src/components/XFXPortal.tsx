@@ -249,15 +249,12 @@ const XFXPortal = () => {
       formData.append('file', uploadedFile);
       formData.append('resumeUrl', resumeUrl);
       
-      addLog(`Sending file to n8n workflow: ${resumeUrl}`, 'info');
-      console.log('About to call n8n via nginx proxy');
+      addLog(`Sending file via Supabase edge function to: ${resumeUrl}`, 'info');
+      console.log('About to call Supabase edge function');
       console.log('File details:', { name: uploadedFile.name, size: uploadedFile.size, type: uploadedFile.type });
       
-      // Call n8n directly
-      console.log('About to fetch:', resumeUrl);
-      console.log('FormData contents:', { fileName: uploadedFile.name, fileSize: uploadedFile.size });
-      
-      const response = await fetch(resumeUrl, {
+      // Use Supabase edge function to avoid CORS issues
+      const response = await fetch('/functions/v1/upload-to-n8n', {
         method: 'POST',
         body: formData,
       });
