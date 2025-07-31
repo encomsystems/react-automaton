@@ -304,10 +304,10 @@ const XFXPortal = () => {
           setInvoiceResponse(responseData);
           
           // Check if it's the expected XFX API response format
-          if (responseData.xfxTrackingId && responseData.invoiceNo) {
+          if (responseData.id && responseData.dateReceivedUtc) {
             addLog('XFX API response received successfully!', 'success');
-            addLog(`XFX Tracking ID: ${responseData.xfxTrackingId}`, 'info');
-            addLog(`Invoice Number: ${responseData.invoiceNo}`, 'info');
+            addLog(`XFX Tracking ID: ${responseData.id}`, 'info');
+            addLog(`Invoice Number: ${responseData.number || 'N/A'}`, 'info');
             if (responseData.externalTrackingId) {
               addLog(`External Tracking ID: ${responseData.externalTrackingId}`, 'info');
             }

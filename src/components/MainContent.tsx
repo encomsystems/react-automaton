@@ -332,7 +332,7 @@ export const MainContent = ({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">Invoice Number</p>
-                    <p className="text-sm text-muted-foreground">{invoiceResponse.invoiceNo}</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.number || invoiceResponse.invoiceNo || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">External Tracking ID</p>
@@ -340,7 +340,7 @@ export const MainContent = ({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">XFX Tracking ID</p>
-                    <p className="text-sm text-muted-foreground">{invoiceResponse.xfxTrackingId}</p>
+                    <p className="text-sm text-muted-foreground">{invoiceResponse.id || invoiceResponse.xfxTrackingId}</p>
                   </div>
                 </div>
               </div>
