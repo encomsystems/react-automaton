@@ -412,24 +412,42 @@ const XFXPortal = () => {
     }
   };
 
-  // Auto-advance steps when invoice response is received (removed automatic webhook call to avoid CORS)
+  // Second polling mechanism - check for final status updates every 5 seconds
   useEffect(() => {
-    if (invoiceResponse) {
-      // Check if the response has errors
-      const hasErrors = Array.isArray(invoiceResponse) 
-        ? invoiceResponse.some(item => item.error === true)
-        : invoiceResponse.error === true;
+    if (currentStep === 'resolution' && resumeUrl) {
+      addLog('Starting second poll for final status...', 'info');
+      
+      const pollForFinalStatus = async () => {
+        try {
+          const response = await fetch(`${resumeUrl}/status`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            addLog(`Second poll response: ${JSON.stringify(data)}`, 'info');
+            setFinalResponse(data);
+          }
+        } catch (error) {
+          addLog(`Second poll error: ${error.message}`, 'warning');
+        }
+      };
 
-      if (hasErrors) {
-        addLog('Invoice processing failed - stopping workflow due to errors', 'error');
-        setCurrentStep('issues');
-        return;
-      }
+      const interval = setInterval(() => {
+        addLog('Checking final status...', 'info');
+        pollForFinalStatus();
+      }, 5000);
 
-      // Invoice processing is complete - no need for additional webhook calls
-      addLog('Invoice processing completed successfully', 'success');
+      // Cleanup interval when component unmounts or step changes
+      return () => {
+        clearInterval(interval);
+        addLog('Second poll stopped', 'info');
+      };
     }
-  }, [invoiceResponse]);
+  }, [currentStep, resumeUrl]);
 
   return (
     <div className="min-h-screen bg-gray-100">
