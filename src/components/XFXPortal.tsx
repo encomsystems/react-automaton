@@ -316,17 +316,46 @@ const XFXPortal = () => {
               addLog(`Date Received: ${receivedDate}`, 'info');
             }
             
-            // Wait 3 seconds before advancing to Invoice Processing step
-            setTimeout(() => {
-              setCurrentStep('issues');
-              addLog('Invoice processing step started', 'info');
-              
-              // Wait 3 seconds then advance to final step
+            // Check ksefSubmissionStatus to determine next steps
+            const ksefStatus = responseData.ksefSubmissionStatus;
+            
+            if (ksefStatus === 'SUBMITTED') {
+              // Submitted successfully - proceed to resolution
               setTimeout(() => {
-                setCurrentStep('resolution');
-                addLog('Invoice processing completed', 'success');
+                setCurrentStep('issues');
+                addLog('Invoice processing step started', 'info');
+                
+                setTimeout(() => {
+                  setCurrentStep('resolution');
+                  addLog('Invoice processing completed successfully', 'success');
+                }, 3000);
               }, 3000);
-            }, 3000);
+            } else if (ksefStatus === 'REJECTED') {
+              // Rejected - proceed to resolution but with error state
+              setTimeout(() => {
+                setCurrentStep('issues');
+                addLog('Invoice processing step started', 'info');
+                
+                setTimeout(() => {
+                  setCurrentStep('resolution');
+                  addLog('Invoice processing completed - rejected by system', 'warning');
+                }, 3000);
+              }, 3000);
+            } else if (ksefStatus === 'UNKNOWN' || ksefStatus === 'INPROGRESS') {
+              // Stay in products step - don't advance
+              addLog(`Invoice status: ${ksefStatus} - staying in processing step`, 'info');
+            } else {
+              // Default behavior for backwards compatibility
+              setTimeout(() => {
+                setCurrentStep('issues');
+                addLog('Invoice processing step started', 'info');
+                
+                setTimeout(() => {
+                  setCurrentStep('resolution');
+                  addLog('Invoice processing completed', 'success');
+                }, 3000);
+              }, 3000);
+            }
           } else if (responseData.error || responseData.errorMessage) {
             // Handle error response
             setHasError(true);
