@@ -287,75 +287,57 @@ const XFXPortal = () => {
       console.log('Response data:', data);
       addLog('Invoice sent successfully to n8n', 'success');
       
-      // Handle the response data - check if it's the expected format
+      // Handle the response data and always progress through steps
       if (data) {
         console.log('Processing response data:', data);
-        
-        // Check if it's just a workflow started message
-        if (data.message === "Workflow was started") {
-          addLog('Workflow started, waiting for XFX API response...', 'info');
-          // Stay in current step until we get the actual response
-          return;
-        }
         
         // If data is an array, take the first element
         const responseData = Array.isArray(data) ? data[0] : data;
         
         if (responseData) {
           setInvoiceResponse(responseData);
+          addLog('Response received from workflow', 'success');
           
-          // Check if it's the expected XFX API response format
-          if (responseData.id && responseData.dateReceivedUtc) {
-            addLog('XFX API response received successfully!', 'success');
+          // Log any relevant information from the response
+          if (responseData.id) {
             addLog(`XFX Tracking ID: ${responseData.id}`, 'info');
-            addLog(`Invoice Number: ${responseData.number || 'N/A'}`, 'info');
-            if (responseData.externalTrackingId) {
-              addLog(`External Tracking ID: ${responseData.externalTrackingId}`, 'info');
-            }
-            if (responseData.dateReceivedUtc) {
-              const receivedDate = new Date(responseData.dateReceivedUtc).toLocaleString();
-              addLog(`Date Received: ${receivedDate}`, 'info');
-            }
-            
-            // Progress through steps with 5-second delays
-            setTimeout(() => {
-              setCurrentStep('issues');
-              addLog('Invoice processing step started', 'info');
-              
-              setTimeout(() => {
-                setCurrentStep('resolution');
-                addLog('Invoice processing completed', 'success');
-              }, 5000);
-            }, 5000);
-          } else if (responseData.error || responseData.errorMessage) {
-            // Handle error response
+          }
+          if (responseData.number) {
+            addLog(`Invoice Number: ${responseData.number}`, 'info');
+          }
+          if (responseData.externalTrackingId) {
+            addLog(`External Tracking ID: ${responseData.externalTrackingId}`, 'info');
+          }
+          if (responseData.dateReceivedUtc) {
+            const receivedDate = new Date(responseData.dateReceivedUtc).toLocaleString();
+            addLog(`Date Received: ${receivedDate}`, 'info');
+          }
+          if (responseData.message) {
+            addLog(`Workflow message: ${responseData.message}`, 'info');
+          }
+          
+          // Check for errors
+          if (responseData.error || responseData.errorMessage) {
             setHasError(true);
-            setInvoiceResponse(responseData);
-            addLog(`Error from XFX API: ${responseData.errorMessage || responseData.error}`, 'error');
-            
-            // Add internalTrackID and timestamp if available
+            addLog(`Error: ${responseData.errorMessage || responseData.error}`, 'error');
             if (responseData.internalTrackID) {
               addLog(`Internal Track ID: ${responseData.internalTrackID}`, 'error');
             }
-            if (responseData.timestamp) {
-              addLog(`Timestamp: ${responseData.timestamp}`, 'error');
-            }
-            
-            // Set steps to error state
-            setCurrentStep('issues');
-            setTimeout(() => {
-              setCurrentStep('resolution');
-              addLog('Invoice processing unsuccessful', 'error');
-            }, 3000);
-          } else {
-            addLog('Waiting for XFX API response...', 'info');
           }
-        } else {
-          addLog('Waiting for XFX API response...', 'info');
         }
-      } else {
-        addLog('Waiting for XFX API response...', 'info');
       }
+      
+      // Always progress through steps with 5-second delays
+      addLog('Invoice sent successfully, proceeding to next steps...', 'success');
+      setTimeout(() => {
+        setCurrentStep('issues');
+        addLog('Invoice processing step started', 'info');
+        
+        setTimeout(() => {
+          setCurrentStep('resolution');
+          addLog('Invoice processing step completed', 'success');
+        }, 5000);
+      }, 5000);
       
     } catch (error) {
       console.error('Full error details:', error);
