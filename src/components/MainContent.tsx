@@ -237,10 +237,16 @@ export const MainContent = ({
             <Upload className="h-8 w-8 text-primary animate-pulse" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            Processing Invoice
+            {invoiceResponse && (invoiceResponse.ksefSubmissionStatus === 'UNKNOWN' || invoiceResponse.ksefSubmissionStatus === 'INPROGRESS') 
+              ? `Invoice Processed ${invoiceResponse.ksefSubmissionStatus}` 
+              : 'Processing Invoice'
+            }
           </h3>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Your invoice is being sent to the XFX API. Please wait for the response...
+            {invoiceResponse && (invoiceResponse.ksefSubmissionStatus === 'UNKNOWN' || invoiceResponse.ksefSubmissionStatus === 'INPROGRESS')
+              ? <span className="text-destructive font-medium">Invoice status is {invoiceResponse.ksefSubmissionStatus}</span>
+              : 'Your invoice is being sent to the XFX API. Please wait for the response...'
+            }
           </p>
 
           {/* File Information */}
@@ -372,7 +378,10 @@ export const MainContent = ({
         </p>
       </div>
 
-      <div className="bg-card rounded-lg p-8 shadow-medium border">
+      <div className={cn(
+        "rounded-lg p-8 shadow-medium border",
+        invoiceResponse?.ksefSubmissionStatus === 'REJECTED' ? "bg-orange-50 border-orange-200" : "bg-card"
+      )}>
         {invoiceResponse ? (
           <div className="space-y-6">
             {/* Check if there's an error in the response */}
@@ -435,13 +444,27 @@ export const MainContent = ({
               <div className="space-y-4">
                 {/* Success Status Header */}
                 <div className="text-center space-y-4">
-                  <div className="mx-auto h-16 w-16 rounded-full bg-success/10 flex items-center justify-center">
-                    <Upload className="h-8 w-8 text-success" />
+                  <div className={cn(
+                    "mx-auto h-16 w-16 rounded-full flex items-center justify-center",
+                    invoiceResponse.ksefSubmissionStatus === 'REJECTED' ? "bg-orange-100" : "bg-success/10"
+                  )}>
+                    <Upload className={cn(
+                      "h-8 w-8",
+                      invoiceResponse.ksefSubmissionStatus === 'REJECTED' ? "text-orange-600" : "text-success"
+                    )} />
                   </div>
-                  <h3 className="text-lg font-semibold text-success">
-                    Invoice Successfully Submitted
+                  <h3 className={cn(
+                    "text-lg font-semibold",
+                    invoiceResponse.ksefSubmissionStatus === 'REJECTED' ? "text-orange-700" : "text-success"
+                  )}>
+                    {invoiceResponse.ksefSubmissionStatus === 'REJECTED' ? 'Invoice Rejected' : 'Invoice Successfully Submitted'}
                   </h3>
-                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-success/10 text-success text-sm font-medium">
+                  <div className={cn(
+                    "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium",
+                    invoiceResponse.ksefSubmissionStatus === 'REJECTED' 
+                      ? "bg-orange-100 text-orange-700" 
+                      : "bg-success/10 text-success"
+                  )}>
                     Status: {invoiceResponse.ksefSubmissionStatus || invoiceResponse.status || 'SUBMITTED'}
                   </div>
                 </div>
