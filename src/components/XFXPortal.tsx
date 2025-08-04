@@ -412,42 +412,48 @@ const XFXPortal = () => {
     }
   };
 
-  // Second polling mechanism - check for final status updates every 5 seconds
+  // Second polling mechanism - check for ksefSubmissionStatus when we have resumeUrlStage2
   useEffect(() => {
-    if (currentStep === 'resolution' && resumeUrl) {
-      addLog('Starting second poll for final status...', 'info');
+    if (finalResponse && finalResponse.resumeUrlStage2 && finalResponse.status === 'InvoiceAcceptedbyAPI') {
+      addLog('Starting second stage polling for ksefSubmissionStatus...', 'info');
       
-      const pollForFinalStatus = async () => {
+      const pollForKsefStatus = async () => {
         try {
-          const response = await fetch(`${resumeUrl}/status`, {
-            method: 'GET',
+          const response = await fetch(finalResponse.resumeUrlStage2, {
+            method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-            }
+            },
+            body: JSON.stringify({ action: 'checkStatus' })
           });
           
           if (response.ok) {
             const data = await response.json();
-            addLog(`Second poll response: ${JSON.stringify(data)}`, 'info');
-            setFinalResponse(data);
+            addLog(`Second stage poll response: ${JSON.stringify(data)}`, 'info');
+            
+            // Check for ksefSubmissionStatus
+            if (data.ksefSubmissionStatus) {
+              addLog(`ksefSubmissionStatus: ${data.ksefSubmissionStatus}`, 'info');
+              setFinalResponse(prev => ({ ...prev, ...data }));
+            }
           }
         } catch (error) {
-          addLog(`Second poll error: ${error.message}`, 'warning');
+          addLog(`Second stage poll error: ${error.message}`, 'warning');
         }
       };
 
       const interval = setInterval(() => {
-        addLog('Checking final status...', 'info');
-        pollForFinalStatus();
+        addLog('Checking ksefSubmissionStatus...', 'info');
+        pollForKsefStatus();
       }, 5000);
 
-      // Cleanup interval when component unmounts or step changes
+      // Cleanup interval when component unmounts or finalResponse changes
       return () => {
         clearInterval(interval);
-        addLog('Second poll stopped', 'info');
+        addLog('Second stage polling stopped', 'info');
       };
     }
-  }, [currentStep, resumeUrl]);
+  }, [finalResponse]);
 
   return (
     <div className="min-h-screen bg-gray-100">
