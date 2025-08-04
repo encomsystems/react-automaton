@@ -26,6 +26,7 @@ const XFXPortal = () => {
   const [invoiceResponse, setInvoiceResponse] = useState<any>(null);
   const [finalResponse, setFinalResponse] = useState<any>(null);
   const [hasError, setHasError] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([
     {
       id: '1',
@@ -133,6 +134,61 @@ const XFXPortal = () => {
       type
     };
     setLogs(prev => [...prev, newLog]);
+  };
+
+  const pollForStatus = async () => {
+    if (!resumeUrl || !isPolling) return;
+
+    try {
+      addLog('Checking status...', 'info');
+      const response = await fetch(resumeUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'status_check' })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const responseData = Array.isArray(data) ? data[0] : data;
+      
+      if (responseData && responseData.ksefSubmissionStatus) {
+        const ksefStatus = responseData.ksefSubmissionStatus;
+        addLog(`Status check: ${ksefStatus}`, 'info');
+        
+        // Update the invoice response with latest data
+        setInvoiceResponse(responseData);
+        
+        if (ksefStatus === 'SUBMITTED') {
+          setIsPolling(false);
+          setCurrentStep('issues');
+          addLog('Invoice processing step started', 'info');
+          
+          setTimeout(() => {
+            setCurrentStep('resolution');
+            addLog('Invoice processing completed successfully', 'success');
+          }, 3000);
+        } else if (ksefStatus === 'REJECTED') {
+          setIsPolling(false);
+          setCurrentStep('issues');
+          addLog('Invoice processing step started', 'info');
+          
+          setTimeout(() => {
+            setCurrentStep('resolution');
+            addLog('Invoice processing completed - rejected by system', 'warning');
+          }, 3000);
+        } else if (ksefStatus === 'UNKNOWN' || ksefStatus === 'INPROGRESS') {
+          // Continue polling
+          addLog(`Status still ${ksefStatus}, will check again in 5 seconds...`, 'info');
+        }
+      }
+    } catch (error) {
+      addLog(`Error checking status: ${error.message}`, 'error');
+    }
   };
 
   const triggerN8nWorkflow = async () => {
@@ -342,8 +398,9 @@ const XFXPortal = () => {
                 }, 3000);
               }, 3000);
             } else if (ksefStatus === 'UNKNOWN' || ksefStatus === 'INPROGRESS') {
-              // Stay in products step - don't advance
-              addLog(`Invoice status: ${ksefStatus} - staying in processing step`, 'info');
+              // Start polling for status updates
+              addLog(`Invoice status: ${ksefStatus} - starting status polling`, 'info');
+              setIsPolling(true);
             } else {
               // Default behavior for backwards compatibility
               setTimeout(() => {
@@ -440,6 +497,23 @@ const XFXPortal = () => {
       setIsProcessing(false);
     }
   };
+
+  // Polling useEffect
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    if (isPolling) {
+      // Start polling immediately, then every 5 seconds
+      pollForStatus();
+      intervalId = setInterval(pollForStatus, 5000);
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isPolling, resumeUrl]);
 
   // Auto-advance steps when invoice response is received (removed automatic webhook call to avoid CORS)
   useEffect(() => {
